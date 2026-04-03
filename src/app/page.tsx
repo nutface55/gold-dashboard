@@ -175,17 +175,18 @@ export default function Dashboard() {
     <div className="min-h-screen bg-zinc-950 text-white">
       {/* Header */}
       <header className="border-b border-zinc-800 bg-zinc-950 sticky top-0 z-40">
+        <div className="h-0.5 bg-gradient-to-r from-yellow-600/60 via-yellow-400/40 to-transparent" />
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-bold text-yellow-400">Gold Dashboard</h1>
-            <p className="text-xs text-zinc-500">96.5% Thai Gold — {totalWeight}B → 150B target</p>
+            <h1 className="text-lg font-bold text-yellow-400 tracking-tight">Gold Dashboard</h1>
+            <p className="text-xs text-zinc-500">96.5% Thai Gold · {totalWeight}B → 150B</p>
           </div>
           <div className="flex items-center gap-3">
             {price && price.barSell > 0 && (
               <div className="text-right">
-                <div className="text-sm font-bold text-white">
+                <div className="text-base font-bold text-yellow-300">
                   ฿{currentSellPrice.toLocaleString()}
-                  <span className="text-xs text-zinc-500 ml-1">sell</span>
+                  <span className="text-xs text-zinc-500 ml-1 font-normal">sell</span>
                 </div>
                 <div className="text-xs text-zinc-500">
                   {price.source} ·{' '}

@@ -43,8 +43,8 @@ export default function BandPosition({ bandPosition, loading }: Props) {
   return (
     <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Band Position</h3>
-        <span className={`text-xs font-bold ${zoneColors[zone]}`}>{zoneLabels[zone]}</span>
+        <h3 className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">Band Position</h3>
+        <span className={`text-xs font-semibold ${zoneColors[zone]}`}>{zoneLabels[zone]}</span>
       </div>
 
       {/* Band bar */}
@@ -77,7 +77,7 @@ export default function BandPosition({ bandPosition, loading }: Props) {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-zinc-800 rounded-lg p-3 text-center">
           <div className="text-xs text-zinc-500 mb-1">vs SMA</div>
           <div className={`text-base font-bold ${percentAboveSma >= 0 ? 'text-red-400' : 'text-green-400'}`}>
@@ -86,7 +86,7 @@ export default function BandPosition({ bandPosition, loading }: Props) {
         </div>
         <div className="bg-zinc-800 rounded-lg p-3 text-center">
           <div className="text-xs text-zinc-500 mb-1">Current Price</div>
-          <div className="text-base font-bold text-white">฿{currentPrice.toLocaleString()}</div>
+          <div className="text-base font-bold text-yellow-300">฿{currentPrice.toLocaleString()}</div>
         </div>
         <div className="bg-zinc-800 rounded-lg p-3 text-center">
           <div className="text-xs text-zinc-500 mb-1">To Upper Band</div>

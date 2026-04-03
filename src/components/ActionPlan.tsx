@@ -77,20 +77,20 @@ export default function ActionPlan({ plan, loading }: Props) {
   const Icon = cfg.icon;
 
   return (
-    <div className={`border-2 rounded-xl p-5 ${cfg.bg}`}>
-      <div className="flex items-center gap-3 mb-3">
-        <Icon className={`w-6 h-6 ${cfg.iconColor}`} />
-        <span className={`text-xs font-bold px-2 py-1 rounded ${cfg.badge}`}>{cfg.label}</span>
+    <div className={`border-2 rounded-2xl p-6 ${cfg.bg}`}>
+      <div className="flex items-center gap-3 mb-4">
+        <Icon className={`w-7 h-7 ${cfg.iconColor}`} />
+        <span className={`text-xs font-bold px-3 py-1 rounded-full tracking-wide ${cfg.badge}`}>{cfg.label}</span>
         {plan.cashWarning && (
-          <span className="flex items-center gap-1 text-xs text-yellow-400">
+          <span className="flex items-center gap-1 text-xs text-yellow-400 font-medium">
             <Clock className="w-3 h-3" />
             30-day clock running!
           </span>
         )}
       </div>
 
-      <h2 className="text-xl font-bold text-white mb-2">{plan.headline}</h2>
-      <p className="text-sm text-zinc-300 mb-4 whitespace-pre-line">{plan.detail}</p>
+      <h2 className="text-2xl font-bold text-white mb-3 leading-snug">{plan.headline}</h2>
+      <p className="text-sm text-zinc-300 mb-4 whitespace-pre-line leading-relaxed">{plan.detail}</p>
 
       {/* Sell → Rebuy preview — shown on all sell signals */}
       {plan.rebuySummary && (

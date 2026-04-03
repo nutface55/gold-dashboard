@@ -35,7 +35,7 @@ export default function CycleHistory({ cycles, onUpdate }: Props) {
   if (cycles.length === 0) {
     return (
       <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-3">Cycle History</h3>
+        <h3 className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2 mb-3">Cycle History</h3>
         <p className="text-sm text-zinc-600">No sell-and-rebuy cycles yet. Record a sale to start tracking.</p>
       </div>
     );
@@ -46,7 +46,7 @@ export default function CycleHistory({ cycles, onUpdate }: Props) {
   return (
     <div className="bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden">
       <div className="px-5 py-4 border-b border-zinc-700">
-        <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Cycle History</h3>
+        <h3 className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">Cycle History</h3>
       </div>
       <div className="divide-y divide-zinc-800">
         {cycles.map((cycle, i) => {

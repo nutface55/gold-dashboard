@@ -27,7 +27,7 @@ export default function ScenarioGrid({ currentPrice, sma, lowerBand }: Props) {
         className="w-full px-5 py-4 flex items-center justify-between hover:bg-zinc-800/40 transition-colors"
       >
         <div className="text-left">
-          <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Scenario Comparison</h3>
+          <h3 className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">Scenario Comparison</h3>
           {!isOpen && bestViable && (
             <p className="text-xs text-zinc-600 mt-0.5">
               Best: Sell {bestViable.sellWeight}B → get {bestViable.buybackWeight}B back

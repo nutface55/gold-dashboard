@@ -73,7 +73,7 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
   return (
     <div className="bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-700">
-        <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Lot Inventory</h3>
+        <h3 className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">Lot Inventory</h3>
         <button
           onClick={() => setShowAdd(!showAdd)}
           className="flex items-center gap-1 text-xs bg-green-900 hover:bg-green-800 text-green-200 px-3 py-1.5 rounded-lg transition-colors"

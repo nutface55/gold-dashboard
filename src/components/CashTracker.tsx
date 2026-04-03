@@ -72,7 +72,7 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, a
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <DollarSign className="w-4 h-4 text-yellow-400" />
-          <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Cash on Hand</h3>
+          <h3 className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">Cash on Hand</h3>
         </div>
         {cashState && cashState.amount > 0 && daysSinceSale > 0 && (
           <div className={`flex items-center gap-1 text-xs ${daysSinceSale >= 25 ? 'text-yellow-400' : 'text-zinc-500'}`}>
@@ -82,7 +82,7 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, a
         )}
       </div>
 
-      <div className="text-3xl font-bold text-white mb-4">
+      <div className="text-3xl font-bold text-yellow-300 mb-4">
         ฿{(cashState?.amount || 0).toLocaleString()}
       </div>
 

@@ -37,6 +37,7 @@ export default function PortfolioMetrics({ metrics, loading }: Props) {
           icon={<Coins className="w-4 h-4 text-yellow-400" />}
           value={`${metrics.totalWeight} baht`}
           sub={`${metrics.foreverWeight}B forever locked`}
+          valueColor="text-yellow-300"
           tooltip="Total weight of gold you own. Forever locked = lots up 40%+ that we never sell."
         />
         <MetricCard
@@ -62,6 +63,7 @@ export default function PortfolioMetrics({ metrics, loading }: Props) {
           icon={<TrendingUp className="w-4 h-4 text-purple-400" />}
           value={`฿${metrics.currentValue.toLocaleString()}`}
           sub={`Invested ฿${metrics.totalInvested.toLocaleString()}`}
+          valueColor="text-yellow-300"
           tooltip="What your gold is worth today at the current sell price."
         />
       </div>
@@ -95,8 +97,8 @@ export default function PortfolioMetrics({ metrics, loading }: Props) {
       {/* Progress bar */}
       <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4">
         <div className="flex justify-between mb-2">
-          <span className="text-sm font-semibold text-zinc-300">Progress to 150 baht target</span>
-          <span className="text-sm font-bold text-yellow-400">{metrics.progressTo150}% complete</span>
+          <span className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">Progress to 150B target</span>
+          <span className="text-sm font-bold text-yellow-400">{metrics.progressTo150}%</span>
         </div>
         <div className="h-4 bg-zinc-800 rounded-full overflow-hidden">
           <div
@@ -124,9 +126,9 @@ function MetricCard({
     <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 group relative">
       <div className="flex items-center gap-2 mb-2">
         {icon}
-        <span className="text-xs text-zinc-500 uppercase tracking-wide">{label}</span>
+        <span className="text-xs text-zinc-400 font-medium">{label}</span>
       </div>
-      <div className={`text-lg font-bold ${valueColor}`}>{value}</div>
+      <div className={`text-xl font-bold ${valueColor}`}>{value}</div>
       {sub && <div className="text-xs text-zinc-500 mt-1">{sub}</div>}
       {/* Tooltip on hover */}
       {tooltip && (
