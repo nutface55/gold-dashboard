@@ -24,7 +24,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    await query(`DELETE FROM lots WHERE id=$1`, [id]);
+    const result = await query<{ id: number }>(
+      `DELETE FROM lots WHERE id=$1 RETURNING id`, [id]
+    );
+    if (result.length === 0) {
+      return NextResponse.json({ error: 'Lot not found' }, { status: 404 });
+    }
     return NextResponse.json({ success: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
