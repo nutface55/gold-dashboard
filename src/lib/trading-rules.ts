@@ -210,9 +210,11 @@ export function generateActionPlan(
 
   // ─── Priority 3: BUY signals (tiered) ────────────────────────────────────
 
-  // Strong buy: price below avg buy price OR within 2% of lower band
+  // Strong buy: price at least 1% below tradable avg cost OR within 2% of lower band
+  // (1% gap avoids triggering on noise when price ≈ avg cost)
   const distToLower = ((bandPosition.currentPrice - bandPosition.lowerBand) / bandPosition.currentPrice) * 100;
-  if (bandPosition.currentPrice < avgBuyPrice || distToLower <= 2) {
+  const meaningfullyBelowAvg = bandPosition.currentPrice < avgBuyPrice * 0.99;
+  if (meaningfullyBelowAvg || distToLower <= 2) {
     const impact10 = calculateInjectionImpact(portfolioMetrics.totalWeight, avgBuyPrice, 10, bandPosition.currentPrice);
     const impact5 = calculateInjectionImpact(portfolioMetrics.totalWeight, avgBuyPrice, 5, bandPosition.currentPrice);
     return {
