@@ -8,7 +8,6 @@ import CashTracker from '@/components/CashTracker';
 import PortfolioMetrics from '@/components/PortfolioMetrics';
 import ScenarioGrid from '@/components/ScenarioGrid';
 import LotTable from '@/components/LotTable';
-import PriceChart from '@/components/PriceChart';
 import TradingViewChart from '@/components/TradingViewChart';
 import CycleHistory from '@/components/CycleHistory';
 
@@ -263,16 +262,7 @@ export default function Dashboard() {
           />
         )}
 
-        {/* 6. Price Chart */}
-        {bands && (
-          <PriceChart
-            priceHistory={priceHistory}
-            bands={bands}
-            currentPrice={usePrice}
-          />
-        )}
-
-        {/* 7. Lot Inventory */}
+        {/* 6. Lot Inventory */}
         <LotTable
           lots={lots}
           currentSellPrice={usePrice || avgBuyPrice}
