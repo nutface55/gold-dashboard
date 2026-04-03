@@ -9,6 +9,7 @@ import PortfolioMetrics from '@/components/PortfolioMetrics';
 import ScenarioGrid from '@/components/ScenarioGrid';
 import LotTable from '@/components/LotTable';
 import PriceChart from '@/components/PriceChart';
+import TradingViewChart from '@/components/TradingViewChart';
 import CycleHistory from '@/components/CycleHistory';
 
 import { GoldPrice } from '@/lib/price-fetcher';
@@ -237,7 +238,10 @@ export default function Dashboard() {
         {/* 2. Band Position */}
         <BandPosition bandPosition={bandPosition} loading={loading} />
 
-        {/* 3. Portfolio Metrics */}
+        {/* 3. TradingView Chart */}
+        <TradingViewChart />
+
+        {/* 4. Portfolio Metrics */}
         <PortfolioMetrics metrics={metrics} loading={loading} />
 
         {/* 4. Cash Tracker */}
