@@ -21,10 +21,9 @@ export function getDb(): NeonQueryFunction<false, false> {
 // For DDL (schema/seed), we use the tagged template literal form
 export async function query<T = unknown>(sql: string, params: unknown[] = []): Promise<T[]> {
   const db = getDb();
-  // neon supports parameterized queries directly when called as a function
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result = await (db as any)(sql, params);
-  return result as T[];
+  const result = await (db as any).query(sql, params);
+  return (result.rows ?? result) as T[];
 }
 
 export async function queryOne<T = unknown>(sql: string, params: unknown[] = []): Promise<T | null> {
