@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Lot, isForeverLot } from '@/lib/trading-rules';
+import { Lot, isForeverLot, isLockedLot } from '@/lib/trading-rules';
 import { Star, Lock, LockOpen, Pencil, Trash2, Plus, Check, X } from 'lucide-react';
 
 interface Props {
@@ -256,6 +256,57 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
           </tbody>
         </table>
       </div>
+
+      {/* Tradable lot summary */}
+      {(() => {
+        const tradableLots = lots.filter(l => !isLockedLot(l, currentSellPrice));
+        if (tradableLots.length === 0) return (
+          <div className="px-5 py-3 border-t border-zinc-800 text-xs text-zinc-500">
+            All lots are locked — no tradable positions.
+          </div>
+        );
+
+        const tradableWeight = tradableLots.reduce((s, l) => s + l.weight, 0);
+        const tradableInvested = tradableLots.reduce((s, l) => s + l.weight * l.buy_price, 0);
+        const tradableAvg = Math.round(tradableInvested / tradableWeight);
+        const tradableValue = tradableWeight * currentSellPrice;
+        const tradablePnlAmt = tradableValue - tradableInvested;
+        const tradablePnlPct = (tradablePnlAmt / tradableInvested) * 100;
+        const lotNumbers = tradableLots.map(l => `Lot ${lots.indexOf(l) + 1}`).join(', ');
+
+        return (
+          <div className="border-t border-zinc-700 px-5 py-4 bg-zinc-800/40">
+            <p className="text-xs font-semibold text-zinc-200 border-l-2 border-blue-500 pl-2 mb-3">
+              Tradable Pool — what signals are based on
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+              <div className="bg-zinc-900 rounded-lg p-3">
+                <div className="text-xs text-zinc-500 mb-1">Tradable Weight</div>
+                <div className="text-base font-bold text-white">{tradableWeight}B</div>
+              </div>
+              <div className="bg-zinc-900 rounded-lg p-3">
+                <div className="text-xs text-zinc-500 mb-1">Tradable Avg Cost</div>
+                <div className="text-base font-bold text-yellow-300">฿{tradableAvg.toLocaleString()}</div>
+              </div>
+              <div className="bg-zinc-900 rounded-lg p-3">
+                <div className="text-xs text-zinc-500 mb-1">Tradable P&L</div>
+                <div className={`text-base font-bold ${tradablePnlAmt >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {tradablePnlAmt >= 0 ? '+' : ''}฿{tradablePnlAmt.toLocaleString()}
+                </div>
+              </div>
+              <div className="bg-zinc-900 rounded-lg p-3">
+                <div className="text-xs text-zinc-500 mb-1">Tradable P&L %</div>
+                <div className={`text-base font-bold ${tradablePnlPct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {tradablePnlPct >= 0 ? '+' : ''}{tradablePnlPct.toFixed(1)}%
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-zinc-500">
+              <span className="text-zinc-400 font-medium">Tradable lots:</span> {lotNumbers}
+            </p>
+          </div>
+        );
+      })()}
     </div>
   );
 }
