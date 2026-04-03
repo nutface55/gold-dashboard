@@ -19,6 +19,9 @@ export interface PortfolioMetrics {
   pnlPercent: number;
   foreverWeight: number;
   tradableWeight: number;
+  tradableAvgBuyPrice: number;
+  tradablePnlPercent: number;
+  tradablePnlAmount: number;
   progressTo150: number;
   unrealisedProfitPerBaht: number;
   costToTarget: number;
@@ -55,8 +58,16 @@ export function computePortfolioMetrics(lots: Lot[], currentBuyPrice: number): P
   const pnlPercent = totalInvested > 0 ? (pnlAmount / totalInvested) * 100 : 0;
 
   const foreverWeight = lots
-    .filter(l => isForeverLot(l, currentBuyPrice))
+    .filter(l => isLockedLot(l, currentBuyPrice))
     .reduce((s, l) => s + l.weight, 0);
+
+  const tradableLots = lots.filter(l => !isLockedLot(l, currentBuyPrice));
+  const tradableWeight = tradableLots.reduce((s, l) => s + l.weight, 0);
+  const tradableInvested = tradableLots.reduce((s, l) => s + l.weight * l.buy_price, 0);
+  const tradableAvgBuyPrice = tradableWeight > 0 ? Math.round(tradableInvested / tradableWeight) : avgBuyPrice;
+  const tradableValue = tradableWeight * currentBuyPrice;
+  const tradablePnlAmount = tradableValue - tradableInvested;
+  const tradablePnlPercent = tradableInvested > 0 ? Math.round((tradablePnlAmount / tradableInvested) * 1000) / 10 : 0;
 
   const bricksToTarget = Math.max(0, 150 - totalWeight);
   const costToTarget = bricksToTarget * currentBuyPrice;
@@ -70,7 +81,10 @@ export function computePortfolioMetrics(lots: Lot[], currentBuyPrice: number): P
     pnlAmount,
     pnlPercent: Math.round(pnlPercent * 10) / 10,
     foreverWeight,
-    tradableWeight: totalWeight - foreverWeight,
+    tradableWeight,
+    tradableAvgBuyPrice,
+    tradablePnlPercent,
+    tradablePnlAmount,
     progressTo150: Math.round((totalWeight / 150) * 100),
     unrealisedProfitPerBaht,
     costToTarget,
@@ -78,10 +92,15 @@ export function computePortfolioMetrics(lots: Lot[], currentBuyPrice: number): P
   };
 }
 
-// Rule 1: Forever lots (P&L ≥ 40%)
+// Rule 1: Forever lots (P&L ≥ 40% — automatic, system-decided)
 export function isForeverLot(lot: Lot, currentSellPrice: number): boolean {
   const pnl = ((currentSellPrice - lot.buy_price) / lot.buy_price) * 100;
   return pnl >= 40;
+}
+
+// A lot is locked if manually locked by user OR auto-forever by P&L rule
+export function isLockedLot(lot: Lot, currentSellPrice: number): boolean {
+  return lot.is_forever || isForeverLot(lot, currentSellPrice);
 }
 
 // Build the sell→rebuy preview shown at point of sell decision
@@ -111,7 +130,8 @@ export function generateActionPlan(
   currentSellPrice: number
 ): ActionPlan {
   const { percentAboveSma, rsi, rsiReliable } = bandPosition;
-  const { pnlPercent, avgBuyPrice } = portfolioMetrics;
+  // Use tradable-only metrics so locked/forever lots don't distort signals
+  const { tradablePnlPercent: pnlPercent, tradableAvgBuyPrice: avgBuyPrice } = portfolioMetrics;
   const hasCash = cashState && cashState.amount > 0;
 
   const rsiNote = rsiReliable

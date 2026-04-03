@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Lot, isForeverLot } from '@/lib/trading-rules';
-import { Star, Pencil, Trash2, Plus, Check, X } from 'lucide-react';
+import { Star, Lock, LockOpen, Pencil, Trash2, Plus, Check, X } from 'lucide-react';
 
 interface Props {
   lots: Lot[];
@@ -43,6 +43,20 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
     setLoading(true);
     try {
       await fetch(`/api/lots/${id}`, { method: 'DELETE' });
+      onUpdate();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function toggleLock(lot: Lot) {
+    setLoading(true);
+    try {
+      await fetch(`/api/lots/${lot.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...lot, is_forever: !lot.is_forever }),
+      });
       onUpdate();
     } finally {
       setLoading(false);
@@ -136,7 +150,9 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
           </thead>
           <tbody>
             {lots.map((lot, i) => {
-              const forever = isForeverLot(lot, currentSellPrice);
+              const autoForever = isForeverLot(lot, currentSellPrice);
+              const manualLock = lot.is_forever && !autoForever;
+              const isLocked = autoForever || manualLock;
               const currentValue = lot.weight * currentSellPrice;
               const invested = lot.weight * lot.buy_price;
               const pnlAmt = currentValue - invested;
@@ -177,10 +193,20 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
 
               return (
                 <tr key={lot.id}
-                  className={`border-b border-zinc-800 hover:bg-zinc-800/30 transition-colors ${forever ? 'bg-yellow-900/10' : ''}`}>
+                  className={`border-b border-zinc-800 hover:bg-zinc-800/30 transition-colors
+                    ${autoForever ? 'bg-yellow-900/10' : manualLock ? 'bg-blue-900/10' : ''}`}>
                   <td className="px-4 py-3 text-zinc-400">
-                    {i + 1}
-                    {forever && <span title="Forever lot"><Star className="inline w-3 h-3 text-yellow-400 ml-1" /></span>}
+                    <span className="mr-1">{i + 1}</span>
+                    {autoForever && (
+                      <span title="Forever lot — auto-locked at 40%+ gain">
+                        <Star className="inline w-3 h-3 text-yellow-400" />
+                      </span>
+                    )}
+                    {manualLock && (
+                      <span title="Manually locked — excluded from signals">
+                        <Lock className="inline w-3 h-3 text-blue-400" />
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-zinc-300">{String(lot.date_bought).split('T')[0]}</td>
                   <td className="px-4 py-3 text-right text-white font-medium">{lot.weight}B</td>
@@ -193,18 +219,35 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
                     {pnlPct >= 0 ? '+' : ''}{pnlPct.toFixed(1)}%
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex gap-2 justify-end">
-                      {!forever && (
+                    <div className="flex gap-2 justify-end items-center">
+                      {autoForever && (
+                        <span className="text-xs text-yellow-500">Forever</span>
+                      )}
+                      {!autoForever && (
                         <>
-                          <button onClick={() => startEdit(lot)} className="text-zinc-500 hover:text-zinc-300">
-                            <Pencil className="w-3.5 h-3.5" />
+                          <button
+                            onClick={() => toggleLock(lot)}
+                            disabled={loading}
+                            title={manualLock ? 'Unlock — include in signals' : 'Lock — exclude from signals'}
+                            className={`transition-colors ${manualLock ? 'text-blue-400 hover:text-blue-300' : 'text-zinc-600 hover:text-blue-400'}`}
+                          >
+                            {manualLock
+                              ? <Lock className="w-3.5 h-3.5" />
+                              : <LockOpen className="w-3.5 h-3.5" />
+                            }
                           </button>
-                          <button onClick={() => deleteLot(lot.id)} className="text-zinc-500 hover:text-red-400">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          {!isLocked && (
+                            <>
+                              <button onClick={() => startEdit(lot)} className="text-zinc-500 hover:text-zinc-300">
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                              <button onClick={() => deleteLot(lot.id)} className="text-zinc-500 hover:text-red-400">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </>
+                          )}
                         </>
                       )}
-                      {forever && <span className="text-xs text-yellow-500">Forever</span>}
                     </div>
                   </td>
                 </tr>
