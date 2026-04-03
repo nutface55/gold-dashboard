@@ -6,6 +6,7 @@ export interface BuybackScenario {
   cashFromSale: number;
   buybackWeight: number;      // total baht bought back
   buybackBricks: BrickSize[]; // e.g. [10, 5] = one 10B + one 5B
+  buybackPrice: number;       // actual price used for the buyback
   buybackCost: number;
   leftoverCash: number;
   netGoldGain: number;        // buybackWeight - sellWeight (can be 0 or positive)
@@ -79,6 +80,7 @@ export function calculateScenarios(
         cashFromSale,
         buybackWeight,
         buybackBricks: bricks,
+        buybackPrice,
         buybackCost,
         leftoverCash,
         netGoldGain,
@@ -96,14 +98,15 @@ export function calculateScenarios(
 }
 
 // Format math verification string (Rule 8)
-export function formatMathVerification(scenario: BuybackScenario, buybackPrice: number): string {
+export function formatMathVerification(scenario: BuybackScenario): string {
+  const bp = scenario.buybackPrice;
   const lines = [
     `Sell: ${scenario.sellWeight}B × ฿${scenario.sellPrice.toLocaleString()} = ฿${scenario.cashFromSale.toLocaleString()}`,
-    `Buy back at ฿${buybackPrice.toLocaleString()}: ฿${scenario.cashFromSale.toLocaleString()} ÷ ฿${buybackPrice.toLocaleString()} = ${(scenario.cashFromSale / buybackPrice).toFixed(2)} baht`,
+    `Buy back at ฿${bp.toLocaleString()}: ฿${scenario.cashFromSale.toLocaleString()} ÷ ฿${bp.toLocaleString()} = ${(scenario.cashFromSale / bp).toFixed(2)} baht`,
     `→ ${scenario.buybackBricks.map(b => `${b}B`).join(' + ')} = ${scenario.buybackWeight}B (cost ฿${scenario.buybackCost.toLocaleString()})`,
     `→ Leftover: ฿${scenario.leftoverCash.toLocaleString()}`,
     `→ Net: sold ${scenario.sellWeight}B, got ${scenario.buybackWeight}B back + ฿${scenario.leftoverCash.toLocaleString()} toward next brick`,
-    `✓ Verified: ${scenario.buybackWeight}B × ฿${buybackPrice.toLocaleString()} = ฿${scenario.buybackCost.toLocaleString()}. ฿${scenario.cashFromSale.toLocaleString()} - ฿${scenario.buybackCost.toLocaleString()} = ฿${scenario.leftoverCash.toLocaleString()}. Correct.`,
+    `✓ Verified: ${scenario.buybackWeight}B × ฿${bp.toLocaleString()} = ฿${scenario.buybackCost.toLocaleString()}. ฿${scenario.cashFromSale.toLocaleString()} - ฿${scenario.buybackCost.toLocaleString()} = ฿${scenario.leftoverCash.toLocaleString()}. Correct.`,
   ];
   return lines.join('\n');
 }

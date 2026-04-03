@@ -76,6 +76,12 @@ export function calculateRSI(prices: number[], period = 14): { rsi: number; reli
     avgLoss = (avgLoss * (period - 1) + loss) / period;
   }
 
+  // If all changes are in one direction (no variance), the data is likely
+  // synthetic/linear — RSI is meaningless. Mark as unreliable.
+  const hasUpDay = changes.slice(0, period).some(c => c > 0);
+  const hasDownDay = changes.slice(0, period).some(c => c < 0);
+  if (!hasUpDay || !hasDownDay) return { rsi: 50, reliable: false };
+
   if (avgLoss === 0) return { rsi: 100, reliable: true };
   const rs = avgGain / avgLoss;
   return { rsi: Math.round(100 - 100 / (1 + rs)), reliable: true };

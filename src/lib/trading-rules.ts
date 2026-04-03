@@ -161,7 +161,7 @@ export function generateActionPlan(
         signal: 'buy_back',
         headline: `Buy back ${best.buybackWeight}B gold now — you'll end up with more than you sold`,
         detail: `You have ฿${cashState.amount.toLocaleString()} from your sale ${daysSinceSale} days ago. Gold has dropped enough — buy ${best.buybackBricks.map(b => `${b}B`).join(' + ')} at ฿${bandPosition.currentPrice.toLocaleString()} and you end up with ${best.netGoldGain > 0 ? `+${best.netGoldGain}B more gold` : 'the same gold back'} plus ฿${best.leftoverCash.toLocaleString()} leftover for the next cycle.\n\n📊 Technical: Price is near the SMA (20-day average ฿${bandPosition.sma.toLocaleString()}) — a historically reliable re-entry point.`,
-        mathVerification: formatMathVerification(best, bandPosition.currentPrice),
+        mathVerification: formatMathVerification(best),
         bestScenario: best,
         daysSinceSale,
         cashWarning,
@@ -188,7 +188,7 @@ export function generateActionPlan(
       signal: 'strong_sell',
       headline: 'Sell a 10B brick — gold is at an unusually high price',
       detail: `Gold has pushed above its normal range. This is the clearest sell signal — prices this high don't last. Sell now, collect the cash, and wait to buy back more bricks when it comes back down.\n\n📊 Technical: Price is above the upper Bollinger Band — statistically stretched. Portfolio P&L is ${pnlPercent.toFixed(1)}%. Expected to drop ~${dropToSma}% back toward SMA (฿${bandPosition.sma.toLocaleString()}).${rsiNote}`,
-      mathVerification: best ? formatMathVerification(best, bandPosition.sma) : undefined,
+      mathVerification: best ? formatMathVerification(best) : undefined,
       bestScenario: best,
       rebuySummary: buildRebuySummary(10, bandPosition.currentPrice, bandPosition.sma, bandPosition.lowerBand),
     };
@@ -202,7 +202,7 @@ export function generateActionPlan(
       signal: 'mild_sell',
       headline: 'Consider selling a 5B brick — price is meaningfully above average',
       detail: `Gold is ${percentAboveSma.toFixed(1)}% above its 20-day average — high enough to be worth acting on. Selling a 5B brick now and buying back when it cools down is a solid move. Not urgent, but worth doing.\n\n📊 Technical: Price is ${percentAboveSma.toFixed(1)}% above SMA (฿${bandPosition.sma.toLocaleString()}). Mild sell threshold: 4% above SMA with P&L ≥ 12%. Current P&L: ${pnlPercent.toFixed(1)}%.${rsiNote}`,
-      mathVerification: best ? formatMathVerification(best, bandPosition.sma) : undefined,
+      mathVerification: best ? formatMathVerification(best) : undefined,
       bestScenario: best,
       rebuySummary: buildRebuySummary(5, bandPosition.currentPrice, bandPosition.sma, bandPosition.lowerBand),
     };
@@ -215,8 +215,9 @@ export function generateActionPlan(
   const distToLower = ((bandPosition.currentPrice - bandPosition.lowerBand) / bandPosition.currentPrice) * 100;
   const meaningfullyBelowAvg = bandPosition.currentPrice < avgBuyPrice * 0.99;
   if (meaningfullyBelowAvg || distToLower <= 2) {
-    const impact10 = calculateInjectionImpact(portfolioMetrics.totalWeight, avgBuyPrice, 10, bandPosition.currentPrice);
-    const impact5 = calculateInjectionImpact(portfolioMetrics.totalWeight, avgBuyPrice, 5, bandPosition.currentPrice);
+    // Use blended avgBuyPrice + totalWeight for accurate portfolio avg after injection
+    const impact10 = calculateInjectionImpact(portfolioMetrics.totalWeight, portfolioMetrics.avgBuyPrice, 10, bandPosition.currentPrice);
+    const impact5 = calculateInjectionImpact(portfolioMetrics.totalWeight, portfolioMetrics.avgBuyPrice, 5, bandPosition.currentPrice);
     return {
       signal: 'strong_buy',
       headline: bandPosition.currentPrice < avgBuyPrice
@@ -232,7 +233,7 @@ export function generateActionPlan(
 
   // Mild buy: price below SMA by ≥ 3%
   if (percentAboveSma <= -3) {
-    const impact5 = calculateInjectionImpact(portfolioMetrics.totalWeight, avgBuyPrice, 5, bandPosition.currentPrice);
+    const impact5 = calculateInjectionImpact(portfolioMetrics.totalWeight, portfolioMetrics.avgBuyPrice, 5, bandPosition.currentPrice);
     return {
       signal: 'mild_buy',
       headline: 'Good entry point — gold is below its recent average',
@@ -243,7 +244,7 @@ export function generateActionPlan(
 
   // Mild buy: price below SMA by 1-3% — decent entry
   if (percentAboveSma <= -1) {
-    const impact5 = calculateInjectionImpact(portfolioMetrics.totalWeight, avgBuyPrice, 5, bandPosition.currentPrice);
+    const impact5 = calculateInjectionImpact(portfolioMetrics.totalWeight, portfolioMetrics.avgBuyPrice, 5, bandPosition.currentPrice);
     return {
       signal: 'mild_buy',
       headline: 'Decent entry — gold is slightly below average',
