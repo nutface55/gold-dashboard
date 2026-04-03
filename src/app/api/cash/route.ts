@@ -67,6 +67,9 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const { amount, sale_date } = await req.json();
+    if (typeof amount !== 'number' || amount < 0) {
+      return NextResponse.json({ error: 'Amount must be a non-negative number' }, { status: 400 });
+    }
     const state = await queryOne(
       `UPDATE cash_state SET amount=$1, sale_date=$2, updated_at=NOW()
        WHERE id=(SELECT id FROM cash_state LIMIT 1)
