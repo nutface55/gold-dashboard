@@ -19,7 +19,7 @@ export default function BandPosition({ bandPosition, loading }: Props) {
 
   if (!bandPosition) return null;
 
-  const { sma, upperBand, lowerBand, currentPrice, positionRatio, zone, percentAboveSma, percentToUpperBand, percentToLowerBand } = bandPosition;
+  const { sma, upperBand, lowerBand, currentPrice, positionRatio, zone, percentAboveSma, percentToUpperBand, percentToLowerBand, rsi, rsiReliable } = bandPosition;
 
   // Clamp position for display
   const clampedRatio = Math.max(0.02, Math.min(0.98, positionRatio));
@@ -77,7 +77,7 @@ export default function BandPosition({ bandPosition, loading }: Props) {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-4 gap-3">
         <div className="bg-zinc-800 rounded-lg p-3 text-center">
           <div className="text-xs text-zinc-500 mb-1">vs SMA</div>
           <div className={`text-base font-bold ${percentAboveSma >= 0 ? 'text-red-400' : 'text-green-400'}`}>
@@ -94,13 +94,61 @@ export default function BandPosition({ bandPosition, loading }: Props) {
             {percentToUpperBand >= 0 ? '+' : ''}{percentToUpperBand.toFixed(1)}%
           </div>
         </div>
+        {/* RSI */}
+        <div className="bg-zinc-800 rounded-lg p-3 text-center">
+          <div className="text-xs text-zinc-500 mb-1">RSI (14)</div>
+          {rsiReliable ? (
+            <div className={`text-base font-bold ${rsi >= 70 ? 'text-red-400' : rsi <= 30 ? 'text-green-400' : 'text-zinc-300'}`}>
+              {rsi}
+              <span className="text-xs font-normal ml-1 text-zinc-500">
+                {rsi >= 70 ? 'OB' : rsi <= 30 ? 'OS' : '—'}
+              </span>
+            </div>
+          ) : (
+            <div className="text-xs text-zinc-500 mt-1">Building...</div>
+          )}
+        </div>
       </div>
 
-      <p className="text-xs text-zinc-500 mt-3">
-        Price is {Math.abs(percentAboveSma).toFixed(1)}% {percentAboveSma >= 0 ? 'above' : 'below'} SMA
-        {' '}and {Math.abs(percentToLowerBand).toFixed(1)}% above lower band.
-        {' '}Bollinger Bands: 20-day SMA ± 2σ.
-      </p>
+      {/* RSI bar */}
+      {rsiReliable && (
+        <div className="mt-3">
+          <div className="relative h-2 rounded-full bg-zinc-700 overflow-hidden">
+            <div className="absolute inset-0 flex">
+              <div className="flex-[30] bg-green-900/60" />
+              <div className="flex-[40] bg-zinc-700" />
+              <div className="flex-[30] bg-red-900/60" />
+            </div>
+            {/* Marker */}
+            <div
+              className={`absolute top-0 bottom-0 w-2 rounded-full ${rsi >= 70 ? 'bg-red-400' : rsi <= 30 ? 'bg-green-400' : 'bg-zinc-300'}`}
+              style={{ left: `calc(${rsi}% - 4px)` }}
+            />
+            {/* Zone lines */}
+            <div className="absolute top-0 bottom-0 w-px bg-green-500" style={{ left: '30%' }} />
+            <div className="absolute top-0 bottom-0 w-px bg-red-500" style={{ left: '70%' }} />
+          </div>
+          <div className="flex justify-between text-xs text-zinc-600 mt-0.5">
+            <span>Oversold 30</span>
+            <span>Neutral</span>
+            <span>70 Overbought</span>
+          </div>
+        </div>
+      )}
+
+      {!rsiReliable && (
+        <p className="text-xs text-zinc-600 mt-3">
+          RSI needs 14+ days of real price data to be reliable — currently building. Bollinger Bands: 20-day SMA ± 2σ.
+        </p>
+      )}
+
+      {rsiReliable && (
+        <p className="text-xs text-zinc-500 mt-3">
+          Price is {Math.abs(percentAboveSma).toFixed(1)}% {percentAboveSma >= 0 ? 'above' : 'below'} SMA
+          {' '}· RSI {rsi} ({rsi >= 70 ? 'overbought — confirms sell' : rsi <= 30 ? 'oversold — confirms buy' : 'neutral'})
+          {' '}· Bollinger Bands: 20-day SMA ± 2σ.
+        </p>
+      )}
     </div>
   );
 }

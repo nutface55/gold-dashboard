@@ -17,6 +17,8 @@ export interface BandPosition {
   percentToLowerBand: number;     // positive = above lower band
   zone: 'strong_sell' | 'mild_sell' | 'hold' | 'hold_buy' | 'strong_buy';
   positionRatio: number;          // 0 = lower band, 0.5 = SMA, 1 = upper band
+  rsi: number;                    // 0-100, Wilder's 14-period RSI
+  rsiReliable: boolean;           // false until 14+ real price points exist
 }
 
 export function calculateBollingerBands(prices: number[], period = 20): BandData {
@@ -47,6 +49,38 @@ export function calculateBollingerBands(prices: number[], period = 20): BandData
   };
 }
 
+// Wilder's 14-period RSI
+// Returns rsi=50 and reliable=false when there aren't enough real data points
+export function calculateRSI(prices: number[], period = 14): { rsi: number; reliable: boolean } {
+  if (prices.length < period + 1) {
+    return { rsi: 50, reliable: false };
+  }
+
+  const changes = prices.slice(1).map((p, i) => p - prices[i]);
+
+  // Seed with simple average of first `period` changes
+  let avgGain = 0;
+  let avgLoss = 0;
+  for (let i = 0; i < period; i++) {
+    if (changes[i] > 0) avgGain += changes[i];
+    else avgLoss += Math.abs(changes[i]);
+  }
+  avgGain /= period;
+  avgLoss /= period;
+
+  // Wilder's smoothing for the rest
+  for (let i = period; i < changes.length; i++) {
+    const gain = changes[i] > 0 ? changes[i] : 0;
+    const loss = changes[i] < 0 ? Math.abs(changes[i]) : 0;
+    avgGain = (avgGain * (period - 1) + gain) / period;
+    avgLoss = (avgLoss * (period - 1) + loss) / period;
+  }
+
+  if (avgLoss === 0) return { rsi: 100, reliable: true };
+  const rs = avgGain / avgLoss;
+  return { rsi: Math.round(100 - 100 / (1 + rs)), reliable: true };
+}
+
 export function getBandPosition(currentPrice: number, bands: BandData): BandPosition {
   const { sma, upperBand, lowerBand } = bands;
 
@@ -72,6 +106,8 @@ export function getBandPosition(currentPrice: number, bands: BandData): BandPosi
   const range = upperBand - lowerBand;
   const positionRatio = range > 0 ? (currentPrice - lowerBand) / range : 0.5;
 
+  const { rsi, reliable: rsiReliable } = calculateRSI(bands.priceHistory);
+
   return {
     sma,
     upperBand,
@@ -82,6 +118,8 @@ export function getBandPosition(currentPrice: number, bands: BandData): BandPosi
     percentToLowerBand: Math.round(percentToLowerBand * 10) / 10,
     zone,
     positionRatio: Math.max(0, Math.min(1, positionRatio)),
+    rsi,
+    rsiReliable,
   };
 }
 

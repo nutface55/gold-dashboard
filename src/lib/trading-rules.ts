@@ -110,9 +110,15 @@ export function generateActionPlan(
   lots: Lot[],
   currentSellPrice: number
 ): ActionPlan {
-  const { percentAboveSma } = bandPosition;
+  const { percentAboveSma, rsi, rsiReliable } = bandPosition;
   const { pnlPercent, avgBuyPrice } = portfolioMetrics;
   const hasCash = cashState && cashState.amount > 0;
+
+  const rsiNote = rsiReliable
+    ? rsi >= 70 ? `\n\n📈 RSI: ${rsi} — overbought, confirms sell signal.`
+    : rsi <= 30 ? `\n\n📉 RSI: ${rsi} — oversold, confirms buy signal.`
+    : `\n\n📊 RSI: ${rsi} — neutral, neither overbought nor oversold.`
+    : `\n\n📊 RSI: Still building (needs 14+ days of real data).`;
 
   // ─── Priority 1: Cash in hand — find buy-back opportunity ───────────────
   if (hasCash && cashState) {
@@ -161,7 +167,7 @@ export function generateActionPlan(
     return {
       signal: 'strong_sell',
       headline: 'Sell a 10B brick — gold is at an unusually high price',
-      detail: `Gold has pushed above its normal range. This is the clearest sell signal — prices this high don't last. Sell now, collect the cash, and wait to buy back more bricks when it comes back down.\n\n📊 Technical: Price is above the upper Bollinger Band — statistically stretched. Portfolio P&L is ${pnlPercent.toFixed(1)}%. Expected to drop ~${dropToSma}% back toward SMA (฿${bandPosition.sma.toLocaleString()}).`,
+      detail: `Gold has pushed above its normal range. This is the clearest sell signal — prices this high don't last. Sell now, collect the cash, and wait to buy back more bricks when it comes back down.\n\n📊 Technical: Price is above the upper Bollinger Band — statistically stretched. Portfolio P&L is ${pnlPercent.toFixed(1)}%. Expected to drop ~${dropToSma}% back toward SMA (฿${bandPosition.sma.toLocaleString()}).${rsiNote}`,
       mathVerification: best ? formatMathVerification(best, bandPosition.sma) : undefined,
       bestScenario: best,
       rebuySummary: buildRebuySummary(10, bandPosition.currentPrice, bandPosition.sma, bandPosition.lowerBand),
@@ -175,7 +181,7 @@ export function generateActionPlan(
     return {
       signal: 'mild_sell',
       headline: 'Consider selling a 5B brick — price is meaningfully above average',
-      detail: `Gold is ${percentAboveSma.toFixed(1)}% above its 20-day average — high enough to be worth acting on. Selling a 5B brick now and buying back when it cools down is a solid move. Not urgent, but worth doing.\n\n📊 Technical: Price is ${percentAboveSma.toFixed(1)}% above SMA (฿${bandPosition.sma.toLocaleString()}). Mild sell threshold: 4% above SMA with P&L ≥ 12%. Current P&L: ${pnlPercent.toFixed(1)}%.`,
+      detail: `Gold is ${percentAboveSma.toFixed(1)}% above its 20-day average — high enough to be worth acting on. Selling a 5B brick now and buying back when it cools down is a solid move. Not urgent, but worth doing.\n\n📊 Technical: Price is ${percentAboveSma.toFixed(1)}% above SMA (฿${bandPosition.sma.toLocaleString()}). Mild sell threshold: 4% above SMA with P&L ≥ 12%. Current P&L: ${pnlPercent.toFixed(1)}%.${rsiNote}`,
       mathVerification: best ? formatMathVerification(best, bandPosition.sma) : undefined,
       bestScenario: best,
       rebuySummary: buildRebuySummary(5, bandPosition.currentPrice, bandPosition.sma, bandPosition.lowerBand),
@@ -197,7 +203,7 @@ export function generateActionPlan(
       detail: `${bandPosition.currentPrice < avgBuyPrice
         ? `Gold is ฿${(avgBuyPrice - bandPosition.currentPrice).toLocaleString()} below what you paid on average. Every baht you buy now brings your total cost down significantly.`
         : `Gold is right at the bottom of its normal range — historically this is where it bounces back up.`
-      } Stack as hard as you can here.\n\n📊 Technical: ${bandPosition.currentPrice < avgBuyPrice ? `Price (฿${bandPosition.currentPrice.toLocaleString()}) is below your avg buy price (฿${avgBuyPrice.toLocaleString()}) — strong accumulation signal.` : `Price is within 2% of the lower Bollinger Band (฿${bandPosition.lowerBand.toLocaleString()}) — statistically oversold.`}\n\n• Add 5B → new avg: ฿${impact5.newAvgBuyPrice.toLocaleString()} (↓฿${impact5.avgDrop.toLocaleString()}/baht)\n• Add 10B → new avg: ฿${impact10.newAvgBuyPrice.toLocaleString()} (↓฿${impact10.avgDrop.toLocaleString()}/baht)`,
+      } Stack as hard as you can here.\n\n📊 Technical: ${bandPosition.currentPrice < avgBuyPrice ? `Price (฿${bandPosition.currentPrice.toLocaleString()}) is below your avg buy price (฿${avgBuyPrice.toLocaleString()}) — strong accumulation signal.` : `Price is within 2% of the lower Bollinger Band (฿${bandPosition.lowerBand.toLocaleString()}) — statistically oversold.`}\n\n• Add 5B → new avg: ฿${impact5.newAvgBuyPrice.toLocaleString()} (↓฿${impact5.avgDrop.toLocaleString()}/baht)\n• Add 10B → new avg: ฿${impact10.newAvgBuyPrice.toLocaleString()} (↓฿${impact10.avgDrop.toLocaleString()}/baht)${rsiNote}`,
       injectionImpact: impact5,
     };
   }
@@ -208,7 +214,7 @@ export function generateActionPlan(
     return {
       signal: 'mild_buy',
       headline: 'Good entry point — gold is below its recent average',
-      detail: `Gold is ${Math.abs(percentAboveSma).toFixed(1)}% below its 20-day average price. Not the lowest it can go, but a solid entry if you have spare cash. No rush — but better to buy here than when it's back above average.\n\n📊 Technical: Price is ${Math.abs(percentAboveSma).toFixed(1)}% below SMA (฿${bandPosition.sma.toLocaleString()}). Mild buy threshold: 3% below SMA.\n\n• Add 5B → new avg: ฿${impact5.newAvgBuyPrice.toLocaleString()} (↓฿${impact5.avgDrop.toLocaleString()}/baht)`,
+      detail: `Gold is ${Math.abs(percentAboveSma).toFixed(1)}% below its 20-day average price. Not the lowest it can go, but a solid entry if you have spare cash. No rush — but better to buy here than when it's back above average.\n\n📊 Technical: Price is ${Math.abs(percentAboveSma).toFixed(1)}% below SMA (฿${bandPosition.sma.toLocaleString()}). Mild buy threshold: 3% below SMA.\n\n• Add 5B → new avg: ฿${impact5.newAvgBuyPrice.toLocaleString()} (↓฿${impact5.avgDrop.toLocaleString()}/baht)${rsiNote}`,
       injectionImpact: impact5,
     };
   }
@@ -219,7 +225,7 @@ export function generateActionPlan(
     return {
       signal: 'mild_buy',
       headline: 'Decent entry — gold is slightly below average',
-      detail: `Gold is slightly cheaper than its recent average. If you have extra cash sitting idle, this is a reasonable time to put it to work. Not urgent.\n\n📊 Technical: Price is ${Math.abs(percentAboveSma).toFixed(1)}% below SMA (฿${bandPosition.sma.toLocaleString()}).\n\n• Add 5B → new avg: ฿${impact5.newAvgBuyPrice.toLocaleString()} (↓฿${impact5.avgDrop.toLocaleString()}/baht)`,
+      detail: `Gold is slightly cheaper than its recent average. If you have extra cash sitting idle, this is a reasonable time to put it to work. Not urgent.\n\n📊 Technical: Price is ${Math.abs(percentAboveSma).toFixed(1)}% below SMA (฿${bandPosition.sma.toLocaleString()}).\n\n• Add 5B → new avg: ฿${impact5.newAvgBuyPrice.toLocaleString()} (↓฿${impact5.avgDrop.toLocaleString()}/baht)${rsiNote}`,
       injectionImpact: impact5,
     };
   }
@@ -228,6 +234,6 @@ export function generateActionPlan(
   return {
     signal: 'hold',
     headline: 'Do nothing — gold is fairly priced right now',
-    detail: `Gold is in the middle of its normal range — ${Math.abs(percentAboveSma).toFixed(1)}% ${percentAboveSma >= 0 ? 'above' : 'below'} its 20-day average. Not cheap enough to rush to buy, not expensive enough to sell. Hold and wait for a clearer move.\n\n📊 Technical: SMA ฿${bandPosition.sma.toLocaleString()} | Upper band ฿${bandPosition.upperBand.toLocaleString()} | Lower band ฿${bandPosition.lowerBand.toLocaleString()} | Portfolio P&L: ${pnlPercent.toFixed(1)}%.`,
+    detail: `Gold is in the middle of its normal range — ${Math.abs(percentAboveSma).toFixed(1)}% ${percentAboveSma >= 0 ? 'above' : 'below'} its 20-day average. Not cheap enough to rush to buy, not expensive enough to sell. Hold and wait for a clearer move.\n\n📊 Technical: SMA ฿${bandPosition.sma.toLocaleString()} | Upper band ฿${bandPosition.upperBand.toLocaleString()} | Lower band ฿${bandPosition.lowerBand.toLocaleString()} | Portfolio P&L: ${pnlPercent.toFixed(1)}%.${rsiNote}`,
   };
 }
