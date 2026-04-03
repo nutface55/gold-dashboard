@@ -43,7 +43,7 @@ export default function BandPosition({ bandPosition, loading }: Props) {
   return (
     <div className="bg-slate-900 border border-slate-700 rounded-lg p-5">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">Band Position</h3>
+        <h3 className="text-sm font-semibold text-slate-200 border-l-2 border-yellow-500 pl-2">Band Position</h3>
         <span className={`text-xs font-semibold ${zoneColors[zone]}`}>{zoneLabels[zone]}</span>
       </div>
 
@@ -54,7 +54,7 @@ export default function BandPosition({ bandPosition, loading }: Props) {
           <div className="flex-1 bg-green-900/60" title="Buy zone" />
           <div className="w-px bg-green-500" />
           <div className="flex-[2] bg-slate-700/60" title="Hold zone" />
-          <div className="w-px bg-zinc-400" />
+          <div className="w-px bg-slate-400" />
           <div className="flex-1 bg-orange-900/60" title="Mild sell" />
           <div className="w-px bg-red-500" />
           <div className="flex-[0.5] bg-red-900/60" title="Strong sell" />
@@ -121,7 +121,7 @@ export default function BandPosition({ bandPosition, loading }: Props) {
             </div>
             {/* Marker */}
             <div
-              className={`absolute top-0 bottom-0 w-2 rounded-full ${rsi >= 70 ? 'bg-red-400' : rsi <= 30 ? 'bg-green-400' : 'bg-zinc-300'}`}
+              className={`absolute top-0 bottom-0 w-2 rounded-full ${rsi >= 70 ? 'bg-red-400' : rsi <= 30 ? 'bg-green-400' : 'bg-slate-300'}`}
               style={{ left: `calc(${rsi}% - 4px)` }}
             />
             {/* Zone lines */}

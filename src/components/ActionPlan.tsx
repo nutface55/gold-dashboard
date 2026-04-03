@@ -25,7 +25,7 @@ const signalConfig = {
   },
   hold: {
     bg: 'bg-slate-900 border-slate-600',
-    badge: 'bg-zinc-600 text-white',
+    badge: 'bg-slate-600 text-white',
     icon: Minus,
     label: 'HOLD',
     iconColor: 'text-slate-400',

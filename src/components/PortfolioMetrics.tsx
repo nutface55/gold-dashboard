@@ -97,7 +97,7 @@ export default function PortfolioMetrics({ metrics, loading }: Props) {
       {/* Progress bar */}
       <div className="bg-slate-900 border border-slate-700 rounded-lg p-4">
         <div className="flex justify-between mb-2">
-          <span className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">Progress to 150B target</span>
+          <span className="text-sm font-semibold text-slate-200 border-l-2 border-yellow-500 pl-2">Progress to 150B target</span>
           <span className="text-sm font-bold text-yellow-400">{metrics.progressTo150}%</span>
         </div>
         <div className="h-4 bg-slate-800 rounded-full overflow-hidden">

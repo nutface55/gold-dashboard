@@ -35,7 +35,7 @@ export default function CycleHistory({ cycles, onUpdate }: Props) {
   if (cycles.length === 0) {
     return (
       <div className="bg-slate-900 border border-slate-700 rounded-lg p-5">
-        <h3 className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2 mb-3">Cycle History</h3>
+        <h3 className="text-sm font-semibold text-slate-200 border-l-2 border-yellow-500 pl-2 mb-3">Cycle History</h3>
         <p className="text-sm text-slate-600">No sell-and-rebuy cycles yet. Record a sale to start tracking.</p>
       </div>
     );
@@ -46,9 +46,9 @@ export default function CycleHistory({ cycles, onUpdate }: Props) {
   return (
     <div className="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden">
       <div className="px-5 py-4 border-b border-slate-700">
-        <h3 className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">Cycle History</h3>
+        <h3 className="text-sm font-semibold text-slate-200 border-l-2 border-yellow-500 pl-2">Cycle History</h3>
       </div>
-      <div className="divide-y divide-zinc-800">
+      <div className="divide-y divide-slate-800">
         {cycles.map((cycle, i) => {
           const totalBoughtBack = cycle.buybacks.reduce((s, b) => s + b.buy_weight, 0);
           const netGold = totalBoughtBack - cycle.sell_weight;

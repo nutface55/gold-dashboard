@@ -20,9 +20,9 @@ interface Props {
 export default function PriceChart({ priceHistory, bands, currentPrice }: Props) {
   if (!bands || priceHistory.length === 0) {
     return (
-      <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-3">Price Chart</h3>
-        <div className="h-48 flex items-center justify-center text-zinc-600 text-sm">
+      <div className="bg-slate-900 border border-slate-700 rounded-lg p-5">
+        <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">Price Chart</h3>
+        <div className="h-48 flex items-center justify-center text-slate-600 text-sm">
           Collecting price history... Chart will appear after a few data points.
         </div>
       </div>
@@ -41,12 +41,12 @@ export default function PriceChart({ priceHistory, bands, currentPrice }: Props)
   const maxPrice = Math.max(...priceHistory.map(p => p.price), bands.upperBand) * 1.01;
 
   return (
-    <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-5">
+    <div className="bg-slate-900 border border-slate-700 rounded-lg p-5">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Price Chart — Bollinger Bands</h3>
+        <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Price Chart — Bollinger Bands</h3>
         <div className="flex gap-4 text-xs">
           <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-yellow-400 inline-block" /> SMA (20d)</span>
-          <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-zinc-500 inline-block border-dashed border-t border-zinc-400" /> Bands</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-slate-500 inline-block border-dashed border-t border-slate-400" /> Bands</span>
           <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-blue-400 inline-block" /> Price</span>
         </div>
       </div>

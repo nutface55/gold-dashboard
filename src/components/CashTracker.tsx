@@ -72,7 +72,7 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, a
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <DollarSign className="w-4 h-4 text-yellow-400" />
-          <h3 className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">Cash on Hand</h3>
+          <h3 className="text-sm font-semibold text-slate-200 border-l-2 border-yellow-500 pl-2">Cash on Hand</h3>
         </div>
         {cashState && cashState.amount > 0 && daysSinceSale > 0 && (
           <div className={`flex items-center gap-1 text-xs ${daysSinceSale >= 25 ? 'text-yellow-400' : 'text-slate-500'}`}>
@@ -196,11 +196,7 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, a
               onChange={v => setSaleForm(f => ({ ...f, weight: v }))} placeholder="5 or 10" />
             <FormField label="Sell Price (฿/baht)" type="number" value={saleForm.price}
               onChange={v => setSaleForm(f => ({ ...f, price: v }))} />
-            {saleForm.weight && saleForm.price && (
-              <p className="text-xs text-green-400">
-                Cash generated: ฿{(parseInt(saleForm.weight) * parseInt(saleForm.price)).toLocaleString()}
-              </p>
-            )}
+            {(() => { const w = parseInt(saleForm.weight), p = parseInt(saleForm.price); return w > 0 && p > 0 ? <p className="text-xs text-green-400">Cash generated: ฿{(w * p).toLocaleString()}</p> : null; })()}
             <button
               onClick={recordSale}
               disabled={loading}
@@ -222,12 +218,7 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, a
               onChange={v => setBuybackForm(f => ({ ...f, weight: v }))} placeholder="5 or 10" />
             <FormField label="Buy Price (฿/baht)" type="number" value={buybackForm.price}
               onChange={v => setBuybackForm(f => ({ ...f, price: v }))} />
-            {buybackForm.weight && buybackForm.price && (
-              <p className="text-xs text-blue-400">
-                Cash used: ฿{(parseInt(buybackForm.weight) * parseInt(buybackForm.price)).toLocaleString()}
-                {' '}| Remaining: ฿{Math.max(0, (cashState?.amount || 0) - parseInt(buybackForm.weight) * parseInt(buybackForm.price)).toLocaleString()}
-              </p>
-            )}
+            {(() => { const w = parseInt(buybackForm.weight), p = parseInt(buybackForm.price); return w > 0 && p > 0 ? <p className="text-xs text-blue-400">Cash used: ฿{(w * p).toLocaleString()} | Remaining: ฿{Math.max(0, (cashState?.amount || 0) - w * p).toLocaleString()}</p> : null; })()}
             <button
               onClick={recordBuyback}
               disabled={loading}

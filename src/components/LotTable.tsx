@@ -87,7 +87,7 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
   return (
     <div className="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700">
-        <h3 className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">Lot Inventory</h3>
+        <h3 className="text-sm font-semibold text-slate-200 border-l-2 border-yellow-500 pl-2">Lot Inventory</h3>
         <button
           onClick={() => setShowAdd(!showAdd)}
           className="flex items-center gap-1 text-xs bg-green-900 hover:bg-green-800 text-green-200 px-3 py-1.5 rounded-lg transition-colors"
@@ -272,11 +272,11 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
         const tradableValue = tradableWeight * currentSellPrice;
         const tradablePnlAmt = tradableValue - tradableInvested;
         const tradablePnlPct = (tradablePnlAmt / tradableInvested) * 100;
-        const lotNumbers = tradableLots.map(l => `Lot ${lots.indexOf(l) + 1}`).join(', ');
+        const lotNumbers = tradableLots.map(l => `Lot ${lots.findIndex(o => o.id === l.id) + 1}`).join(', ');
 
         return (
           <div className="border-t border-slate-700 px-5 py-4 bg-slate-800/40">
-            <p className="text-xs font-semibold text-zinc-200 border-l-2 border-blue-500 pl-2 mb-3">
+            <p className="text-xs font-semibold text-slate-200 border-l-2 border-blue-500 pl-2 mb-3">
               Tradable Pool — what signals are based on
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
