@@ -68,25 +68,25 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, a
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-5">
+    <div className="bg-slate-900 border border-slate-700 rounded-lg p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <DollarSign className="w-4 h-4 text-yellow-400" />
           <h3 className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">Cash on Hand</h3>
         </div>
         {cashState && cashState.amount > 0 && daysSinceSale > 0 && (
-          <div className={`flex items-center gap-1 text-xs ${daysSinceSale >= 25 ? 'text-yellow-400' : 'text-zinc-500'}`}>
+          <div className={`flex items-center gap-1 text-xs ${daysSinceSale >= 25 ? 'text-yellow-400' : 'text-slate-500'}`}>
             <Clock className="w-3 h-3" />
             Day {daysSinceSale} / 30
           </div>
         )}
       </div>
 
-      <div className={`text-3xl font-bold ${cashState && cashState.amount > 0 ? 'text-yellow-300' : 'text-zinc-600'}`}>
+      <div className={`text-3xl font-bold font-mono ${cashState && cashState.amount > 0 ? 'text-yellow-300' : 'text-slate-600'}`}>
         ฿{(cashState?.amount || 0).toLocaleString()}
       </div>
       {(!cashState || cashState.amount === 0) && (
-        <p className="text-xs text-zinc-600 mt-1 mb-4">No cash from sales — fully deployed in gold.</p>
+        <p className="text-xs text-slate-600 mt-1 mb-4">No cash from sales — fully deployed in gold.</p>
       )}
       {cashState && cashState.amount > 0 && <div className="mb-4" />}
 
@@ -108,17 +108,17 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, a
 
         return (
           <div className="mb-4 space-y-3">
-            <p className="text-xs text-zinc-500 uppercase tracking-wide">Brick buying power</p>
+            <p className="text-xs text-slate-500 uppercase tracking-wide">Brick buying power</p>
 
             {/* 5B bar */}
             <div>
               <div className="flex justify-between items-center mb-1">
-                <span className="text-xs text-zinc-400">5B brick (฿{cost5.toLocaleString()})</span>
-                <span className={`text-xs font-semibold ${can5 ? 'text-green-400' : 'text-zinc-400'}`}>
+                <span className="text-xs text-slate-400">5B brick (฿{cost5.toLocaleString()})</span>
+                <span className={`text-xs font-semibold ${can5 ? 'text-green-400' : 'text-slate-400'}`}>
                   {can5 ? '✓ Ready' : `฿${(cost5 - cash).toLocaleString()} short`}
                 </span>
               </div>
-              <div className="h-2 bg-zinc-700 rounded-full overflow-hidden">
+              <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all ${can5 ? 'bg-green-500' : 'bg-blue-500'}`}
                   style={{ width: `${pct5 * 100}%` }}
@@ -132,12 +132,12 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, a
             {/* 10B bar */}
             <div>
               <div className="flex justify-between items-center mb-1">
-                <span className="text-xs text-zinc-400">10B brick (฿{cost10.toLocaleString()})</span>
-                <span className={`text-xs font-semibold ${can10 ? 'text-green-400' : 'text-zinc-400'}`}>
+                <span className="text-xs text-slate-400">10B brick (฿{cost10.toLocaleString()})</span>
+                <span className={`text-xs font-semibold ${can10 ? 'text-green-400' : 'text-slate-400'}`}>
                   {can10 ? '✓ Ready' : `฿${(cost10 - cash).toLocaleString()} short`}
                 </span>
               </div>
-              <div className="h-2 bg-zinc-700 rounded-full overflow-hidden">
+              <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all ${can10 ? 'bg-green-500' : 'bg-blue-500'}`}
                   style={{ width: `${pct10 * 100}%` }}
@@ -150,14 +150,14 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, a
 
       {cashState && cashState.amount > 0 && (
         <div className="space-y-2 mb-4">
-          <p className="text-xs text-zinc-500 uppercase tracking-wide mb-2">Buy-back trigger prices</p>
+          <p className="text-xs text-slate-500 uppercase tracking-wide mb-2">Buy-back trigger prices</p>
           {[
             { label: 'Tier 1 (−5% from sell)', price: tier1Price, dist: ((tier1Price - currentPrice) / currentPrice * 100).toFixed(1) },
             { label: 'Tier 2 (SMA)', price: tier2Price, dist: ((tier2Price - currentPrice) / currentPrice * 100).toFixed(1) },
             { label: 'Tier 3 (lower band)', price: tier3Price, dist: ((tier3Price - currentPrice) / currentPrice * 100).toFixed(1) },
           ].map(tier => (
-            <div key={tier.label} className="flex justify-between items-center bg-zinc-800 rounded-lg px-3 py-2">
-              <span className="text-xs text-zinc-400">{tier.label}</span>
+            <div key={tier.label} className="flex justify-between items-center bg-slate-800 rounded-lg px-3 py-2">
+              <span className="text-xs text-slate-400">{tier.label}</span>
               <div className="text-right">
                 <span className="text-sm font-semibold text-white">฿{tier.price.toLocaleString()}</span>
                 <span className={`ml-2 text-xs ${parseFloat(tier.dist) < 0 ? 'text-red-400' : 'text-green-400'}`}>
@@ -245,10 +245,10 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, a
 function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-5 w-full max-w-sm">
+      <div className="bg-slate-900 border border-slate-700 rounded-lg p-5 w-full max-w-sm">
         <div className="flex justify-between items-center mb-4">
           <h4 className="font-semibold text-white">{title}</h4>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white text-xl leading-none">×</button>
+          <button onClick={onClose} className="text-slate-500 hover:text-white text-xl leading-none">×</button>
         </div>
         {children}
       </div>
@@ -262,13 +262,13 @@ function FormField({ label, type, value, onChange, placeholder }: {
 }) {
   return (
     <div>
-      <label className="block text-xs text-zinc-400 mb-1">{label}</label>
+      <label className="block text-xs text-slate-400 mb-1">{label}</label>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-zinc-800 border border-zinc-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+        className="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
       />
     </div>
   );

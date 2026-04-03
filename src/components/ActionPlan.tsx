@@ -24,11 +24,11 @@ const signalConfig = {
     iconColor: 'text-orange-400',
   },
   hold: {
-    bg: 'bg-zinc-900 border-zinc-600',
+    bg: 'bg-slate-900 border-slate-600',
     badge: 'bg-zinc-600 text-white',
     icon: Minus,
     label: 'HOLD',
-    iconColor: 'text-zinc-400',
+    iconColor: 'text-slate-400',
   },
   buy_back: {
     bg: 'bg-blue-950 border-blue-500',
@@ -63,10 +63,10 @@ const signalConfig = {
 export default function ActionPlan({ plan, loading }: Props) {
   if (loading) {
     return (
-      <div className="border border-zinc-700 rounded-xl p-6 bg-zinc-900 animate-pulse">
-        <div className="h-4 bg-zinc-700 rounded w-24 mb-3" />
-        <div className="h-7 bg-zinc-700 rounded w-3/4 mb-2" />
-        <div className="h-4 bg-zinc-700 rounded w-full" />
+      <div className="border border-slate-700 rounded-lg p-6 bg-slate-900 animate-pulse">
+        <div className="h-4 bg-slate-700 rounded w-24 mb-3" />
+        <div className="h-7 bg-slate-700 rounded w-3/4 mb-2" />
+        <div className="h-4 bg-slate-700 rounded w-full" />
       </div>
     );
   }
@@ -77,7 +77,7 @@ export default function ActionPlan({ plan, loading }: Props) {
   const Icon = cfg.icon;
 
   return (
-    <div className={`border-2 rounded-2xl p-6 ${cfg.bg}`}>
+    <div className={`border-2 rounded-lg p-6 ${cfg.bg}`}>
       <div className="flex items-center gap-3 mb-4">
         <Icon className={`w-7 h-7 ${cfg.iconColor}`} />
         <span className={`text-xs font-bold px-3 py-1 rounded-full tracking-wide ${cfg.badge}`}>{cfg.label}</span>
@@ -90,7 +90,7 @@ export default function ActionPlan({ plan, loading }: Props) {
       </div>
 
       <h2 className="text-2xl font-bold text-white mb-3 leading-snug">{plan.headline}</h2>
-      <p className="text-sm text-zinc-300 mb-4 whitespace-pre-line leading-relaxed">{plan.detail}</p>
+      <p className="text-sm text-slate-300 mb-4 whitespace-pre-line leading-relaxed">{plan.detail}</p>
 
       {/* Sell → Rebuy preview — shown on all sell signals */}
       {plan.rebuySummary && (
@@ -107,7 +107,7 @@ export default function ActionPlan({ plan, loading }: Props) {
 
       {/* Math verification */}
       {plan.mathVerification && (
-        <div className="bg-black/40 rounded-lg p-4 mt-3 border border-zinc-700">
+        <div className="bg-black/40 rounded-lg p-4 mt-3 border border-slate-700">
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle className="w-4 h-4 text-yellow-400" />
             <span className="text-xs font-semibold text-yellow-400 uppercase tracking-wide">Math Verification</span>
@@ -119,7 +119,7 @@ export default function ActionPlan({ plan, loading }: Props) {
       )}
 
       {plan.daysSinceSale !== undefined && plan.daysSinceSale > 0 && (
-        <div className={`mt-3 text-xs ${plan.daysSinceSale >= 25 ? 'text-yellow-400' : 'text-zinc-400'}`}>
+        <div className={`mt-3 text-xs ${plan.daysSinceSale >= 25 ? 'text-yellow-400' : 'text-slate-400'}`}>
           Day {plan.daysSinceSale} of 30-day redeployment window
         </div>
       )}

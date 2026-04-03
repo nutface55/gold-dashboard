@@ -85,8 +85,8 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-700">
+    <div className="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700">
         <h3 className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">Lot Inventory</h3>
         <button
           onClick={() => setShowAdd(!showAdd)}
@@ -97,34 +97,34 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
       </div>
 
       {showAdd && (
-        <div className="p-4 bg-zinc-800 border-b border-zinc-700">
+        <div className="p-4 bg-slate-800 border-b border-slate-700">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
             <div>
-              <label className="text-xs text-zinc-400">Date</label>
+              <label className="text-xs text-slate-400">Date</label>
               <input type="date" value={addForm.date_bought}
                 onChange={e => setAddForm(f => ({ ...f, date_bought: e.target.value }))}
-                className="w-full mt-1 bg-zinc-700 border border-zinc-600 rounded px-2 py-1 text-white text-sm" />
+                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-white text-sm" />
             </div>
             <div>
-              <label className="text-xs text-zinc-400">Weight (baht)</label>
+              <label className="text-xs text-slate-400">Weight (baht)</label>
               <select value={addForm.weight}
                 onChange={e => setAddForm(f => ({ ...f, weight: e.target.value }))}
-                className="w-full mt-1 bg-zinc-700 border border-zinc-600 rounded px-2 py-1 text-white text-sm">
+                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-white text-sm">
                 <option value="5">5 baht</option>
                 <option value="10">10 baht</option>
               </select>
             </div>
             <div>
-              <label className="text-xs text-zinc-400">Buy Price (฿/baht)</label>
+              <label className="text-xs text-slate-400">Buy Price (฿/baht)</label>
               <input type="number" value={addForm.buy_price} placeholder="e.g. 75000"
                 onChange={e => setAddForm(f => ({ ...f, buy_price: e.target.value }))}
-                className="w-full mt-1 bg-zinc-700 border border-zinc-600 rounded px-2 py-1 text-white text-sm" />
+                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-white text-sm" />
             </div>
             <div>
-              <label className="text-xs text-zinc-400">Notes</label>
+              <label className="text-xs text-slate-400">Notes</label>
               <input type="text" value={addForm.notes} placeholder="Ausiris"
                 onChange={e => setAddForm(f => ({ ...f, notes: e.target.value }))}
-                className="w-full mt-1 bg-zinc-700 border border-zinc-600 rounded px-2 py-1 text-white text-sm" />
+                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-white text-sm" />
             </div>
           </div>
           <button onClick={addLot} disabled={loading}
@@ -137,7 +137,7 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-xs text-zinc-500 uppercase border-b border-zinc-800">
+            <tr className="text-xs text-slate-500 uppercase border-b border-slate-800">
               <th className="text-left px-4 py-3">Lot</th>
               <th className="text-left px-4 py-3">Date</th>
               <th className="text-right px-4 py-3">Weight</th>
@@ -160,17 +160,17 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
 
               if (editId === lot.id) {
                 return (
-                  <tr key={lot.id} className="border-b border-zinc-800 bg-zinc-800/50">
-                    <td className="px-4 py-2 text-zinc-400">{i + 1}</td>
+                  <tr key={lot.id} className="border-b border-slate-800 bg-slate-800/50">
+                    <td className="px-4 py-2 text-slate-400">{i + 1}</td>
                     <td className="px-4 py-2">
                       <input type="date" value={String(editForm.date_bought || '')}
                         onChange={e => setEditForm(f => ({ ...f, date_bought: e.target.value }))}
-                        className="bg-zinc-700 rounded px-2 py-1 text-white text-xs w-32" />
+                        className="bg-slate-700 rounded px-2 py-1 text-white text-xs w-32" />
                     </td>
                     <td className="px-4 py-2">
                       <select value={editForm.weight}
                         onChange={e => setEditForm(f => ({ ...f, weight: parseInt(e.target.value) }))}
-                        className="bg-zinc-700 rounded px-2 py-1 text-white text-xs">
+                        className="bg-slate-700 rounded px-2 py-1 text-white text-xs">
                         <option value={5}>5B</option>
                         <option value={10}>10B</option>
                       </select>
@@ -178,13 +178,13 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
                     <td className="px-4 py-2">
                       <input type="number" value={editForm.buy_price || ''}
                         onChange={e => setEditForm(f => ({ ...f, buy_price: parseInt(e.target.value) }))}
-                        className="bg-zinc-700 rounded px-2 py-1 text-white text-xs w-24" />
+                        className="bg-slate-700 rounded px-2 py-1 text-white text-xs w-24" />
                     </td>
                     <td colSpan={3} />
                     <td className="px-4 py-2">
                       <div className="flex gap-2">
                         <button onClick={saveEdit} className="text-green-400 hover:text-green-300"><Check className="w-4 h-4" /></button>
-                        <button onClick={() => setEditId(null)} className="text-zinc-500 hover:text-zinc-300"><X className="w-4 h-4" /></button>
+                        <button onClick={() => setEditId(null)} className="text-slate-500 hover:text-slate-300"><X className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>
@@ -193,9 +193,9 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
 
               return (
                 <tr key={lot.id}
-                  className={`border-b border-zinc-800 hover:bg-zinc-800/30 transition-colors
+                  className={`border-b border-slate-800 hover:bg-slate-800/30 transition-colors
                     ${autoForever ? 'bg-yellow-900/10' : manualLock ? 'bg-blue-900/10' : ''}`}>
-                  <td className="px-4 py-3 text-zinc-400">
+                  <td className="px-4 py-3 text-slate-400">
                     <span className="mr-1">{i + 1}</span>
                     {autoForever && (
                       <span title="Forever lot — auto-locked at 40%+ gain">
@@ -208,10 +208,10 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-zinc-300">{String(lot.date_bought).split('T')[0]}</td>
-                  <td className="px-4 py-3 text-right text-white font-medium">{lot.weight}B</td>
-                  <td className="px-4 py-3 text-right text-zinc-300">฿{lot.buy_price.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-right text-white">฿{currentValue.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-slate-300">{String(lot.date_bought).split('T')[0]}</td>
+                  <td className="px-4 py-3 text-right text-white font-medium font-mono">{lot.weight}B</td>
+                  <td className="px-4 py-3 text-right text-slate-300 font-mono">฿{lot.buy_price.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-right text-white font-mono">฿{currentValue.toLocaleString()}</td>
                   <td className={`px-4 py-3 text-right font-medium ${pnlAmt >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     {pnlAmt >= 0 ? '+' : ''}฿{pnlAmt.toLocaleString()}
                   </td>
@@ -229,7 +229,7 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
                             onClick={() => toggleLock(lot)}
                             disabled={loading}
                             title={manualLock ? 'Unlock — include in signals' : 'Lock — exclude from signals'}
-                            className={`transition-colors ${manualLock ? 'text-blue-400 hover:text-blue-300' : 'text-zinc-600 hover:text-blue-400'}`}
+                            className={`transition-colors ${manualLock ? 'text-blue-400 hover:text-blue-300' : 'text-slate-600 hover:text-blue-400'}`}
                           >
                             {manualLock
                               ? <Lock className="w-3.5 h-3.5" />
@@ -238,10 +238,10 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
                           </button>
                           {!isLocked && (
                             <>
-                              <button onClick={() => startEdit(lot)} className="text-zinc-500 hover:text-zinc-300">
+                              <button onClick={() => startEdit(lot)} className="text-slate-500 hover:text-slate-300">
                                 <Pencil className="w-3.5 h-3.5" />
                               </button>
-                              <button onClick={() => deleteLot(lot.id)} className="text-zinc-500 hover:text-red-400">
+                              <button onClick={() => deleteLot(lot.id)} className="text-slate-500 hover:text-red-400">
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </>
@@ -261,7 +261,7 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
       {(() => {
         const tradableLots = lots.filter(l => !isLockedLot(l, currentSellPrice));
         if (tradableLots.length === 0) return (
-          <div className="px-5 py-3 border-t border-zinc-800 text-xs text-zinc-500">
+          <div className="px-5 py-3 border-t border-slate-800 text-xs text-slate-500">
             All lots are locked — no tradable positions.
           </div>
         );
@@ -275,34 +275,34 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
         const lotNumbers = tradableLots.map(l => `Lot ${lots.indexOf(l) + 1}`).join(', ');
 
         return (
-          <div className="border-t border-zinc-700 px-5 py-4 bg-zinc-800/40">
+          <div className="border-t border-slate-700 px-5 py-4 bg-slate-800/40">
             <p className="text-xs font-semibold text-zinc-200 border-l-2 border-blue-500 pl-2 mb-3">
               Tradable Pool — what signals are based on
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-              <div className="bg-zinc-900 rounded-lg p-3">
-                <div className="text-xs text-zinc-500 mb-1">Tradable Weight</div>
-                <div className="text-base font-bold text-white">{tradableWeight}B</div>
+              <div className="bg-slate-900 rounded-lg p-3">
+                <div className="text-xs text-slate-500 mb-1">Tradable Weight</div>
+                <div className="text-base font-bold font-mono text-white">{tradableWeight}B</div>
               </div>
-              <div className="bg-zinc-900 rounded-lg p-3">
-                <div className="text-xs text-zinc-500 mb-1">Tradable Avg Cost</div>
-                <div className="text-base font-bold text-yellow-300">฿{tradableAvg.toLocaleString()}</div>
+              <div className="bg-slate-900 rounded-lg p-3">
+                <div className="text-xs text-slate-500 mb-1">Tradable Avg Cost</div>
+                <div className="text-base font-bold font-mono text-yellow-300">฿{tradableAvg.toLocaleString()}</div>
               </div>
-              <div className="bg-zinc-900 rounded-lg p-3">
-                <div className="text-xs text-zinc-500 mb-1">Tradable P&L</div>
+              <div className="bg-slate-900 rounded-lg p-3">
+                <div className="text-xs text-slate-500 mb-1">Tradable P&L</div>
                 <div className={`text-base font-bold ${tradablePnlAmt >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {tradablePnlAmt >= 0 ? '+' : ''}฿{tradablePnlAmt.toLocaleString()}
                 </div>
               </div>
-              <div className="bg-zinc-900 rounded-lg p-3">
-                <div className="text-xs text-zinc-500 mb-1">Tradable P&L %</div>
+              <div className="bg-slate-900 rounded-lg p-3">
+                <div className="text-xs text-slate-500 mb-1">Tradable P&L %</div>
                 <div className={`text-base font-bold ${tradablePnlPct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {tradablePnlPct >= 0 ? '+' : ''}{tradablePnlPct.toFixed(2)}%
                 </div>
               </div>
             </div>
-            <p className="text-xs text-zinc-500">
-              <span className="text-zinc-400 font-medium">Tradable lots:</span> {lotNumbers}
+            <p className="text-xs text-slate-500">
+              <span className="text-slate-400 font-medium">Tradable lots:</span> {lotNumbers}
             </p>
           </div>
         );

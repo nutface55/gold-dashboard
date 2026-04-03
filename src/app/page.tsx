@@ -172,28 +172,28 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-slate-950 text-white">
       {/* Header */}
-      <header className="border-b border-zinc-800 bg-zinc-950 sticky top-0 z-40">
-        <div className="h-0.5 bg-gradient-to-r from-yellow-600/60 via-yellow-400/40 to-transparent" />
+      <header className="border-b border-slate-700/50 bg-slate-950/95 backdrop-blur sticky top-0 z-40">
+        <div className="h-0.5 bg-gradient-to-r from-yellow-500/80 via-yellow-400/50 to-transparent" />
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div>
             <h1 className="text-lg font-bold text-yellow-400 tracking-tight">Gold Dashboard</h1>
-            <p className="text-xs text-zinc-500">96.5% Thai Gold · {totalWeight}B → 150B</p>
+            <p className="text-xs text-slate-500">96.5% Thai Gold · {totalWeight}B → 150B</p>
           </div>
           <div className="flex items-center gap-3">
             {price && price.barSell > 0 && (
               <div className="text-right">
-                <div className="text-base font-bold text-yellow-300">
+                <div className="text-base font-bold font-mono text-yellow-300">
                   ฿{currentSellPrice.toLocaleString()}
-                  <span className="text-xs text-zinc-500 ml-1 font-normal">sell</span>
+                  <span className="text-xs text-slate-500 ml-1 font-normal">sell</span>
                 </div>
-                <div className="text-xs text-zinc-500">
+                <div className="text-xs text-slate-500">
                   {price.source} ·{' '}
                   {isMarketOpen() ? (
                     <span className="text-green-400"><Wifi className="inline w-3 h-3 mr-0.5" />Live</span>
                   ) : (
-                    <span className="text-zinc-500"><WifiOff className="inline w-3 h-3 mr-0.5" />Closed</span>
+                    <span className="text-slate-500"><WifiOff className="inline w-3 h-3 mr-0.5" />Closed</span>
                   )}
                 </div>
               </div>
@@ -201,9 +201,9 @@ export default function Dashboard() {
             <button
               onClick={() => loadAll(true)}
               disabled={refreshing}
-              className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors"
+              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors"
             >
-              <RefreshCw className={`w-4 h-4 text-zinc-400 ${refreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 text-slate-400 ${refreshing ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
@@ -212,7 +212,7 @@ export default function Dashboard() {
       <main className="max-w-5xl mx-auto px-4 py-6 space-y-6">
         {/* DB Error */}
         {dbError && (
-          <div className="flex items-start gap-3 bg-yellow-950 border border-yellow-700 rounded-xl p-4">
+          <div className="flex items-start gap-3 bg-yellow-950 border border-yellow-700 rounded-lg p-4">
             <AlertCircle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-yellow-300">Database not connected — showing seed data</p>
@@ -223,7 +223,7 @@ export default function Dashboard() {
 
         {/* Price unavailable */}
         {!loading && usePrice === 0 && (
-          <div className="flex items-start gap-3 bg-red-950 border border-red-700 rounded-xl p-4">
+          <div className="flex items-start gap-3 bg-red-950 border border-red-700 rounded-lg p-4">
             <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-red-300">Live price unavailable</p>
@@ -275,7 +275,7 @@ export default function Dashboard() {
         <TradingViewChart />
 
         {lastUpdated && (
-          <p className="text-center text-xs text-zinc-700 pb-4">
+          <p className="text-center text-xs text-slate-700 pb-4">
             Last updated: {lastUpdated.toLocaleTimeString()} · Auto-refreshes every 5 min
           </p>
         )}

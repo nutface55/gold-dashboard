@@ -14,9 +14,9 @@ export default function PortfolioMetrics({ metrics, loading }: Props) {
       <div className="space-y-3 animate-pulse">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-zinc-900 border border-zinc-700 rounded-xl p-4">
-              <div className="h-3 bg-zinc-700 rounded w-20 mb-2" />
-              <div className="h-6 bg-zinc-700 rounded w-28" />
+            <div key={i} className="bg-slate-900 border border-slate-700 rounded-lg p-4">
+              <div className="h-3 bg-slate-700 rounded w-20 mb-2" />
+              <div className="h-6 bg-slate-700 rounded w-28" />
             </div>
           ))}
         </div>
@@ -95,18 +95,18 @@ export default function PortfolioMetrics({ metrics, loading }: Props) {
       </div>
 
       {/* Progress bar */}
-      <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4">
+      <div className="bg-slate-900 border border-slate-700 rounded-lg p-4">
         <div className="flex justify-between mb-2">
           <span className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">Progress to 150B target</span>
           <span className="text-sm font-bold text-yellow-400">{metrics.progressTo150}%</span>
         </div>
-        <div className="h-4 bg-zinc-800 rounded-full overflow-hidden">
+        <div className="h-4 bg-slate-800 rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 rounded-full transition-all duration-500"
             style={{ width: `${Math.min(metrics.progressTo150, 100)}%` }}
           />
         </div>
-        <div className="flex justify-between mt-1 text-xs text-zinc-500">
+        <div className="flex justify-between mt-1 text-xs text-slate-500">
           <span>0B</span>
           <span>75B (halfway)</span>
           <span>150B</span>
@@ -123,16 +123,16 @@ function MetricCard({
   icon?: React.ReactNode; valueColor?: string; tooltip?: string;
 }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 group relative">
+    <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 group relative">
       <div className="flex items-center gap-2 mb-2">
         {icon}
-        <span className="text-xs text-zinc-400 font-medium">{label}</span>
+        <span className="text-xs text-slate-400 font-medium">{label}</span>
       </div>
-      <div className={`text-xl font-bold ${valueColor}`}>{value}</div>
-      {sub && <div className="text-xs text-zinc-500 mt-1">{sub}</div>}
+      <div className={`text-xl font-bold font-mono ${valueColor}`}>{value}</div>
+      {sub && <div className="text-xs text-slate-500 mt-1">{sub}</div>}
       {/* Tooltip on hover */}
       {tooltip && (
-        <div className="absolute bottom-full left-0 mb-2 w-64 bg-zinc-800 border border-zinc-600 rounded-lg p-3 text-xs text-zinc-300 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
+        <div className="absolute bottom-full left-0 mb-2 w-64 bg-slate-800 border border-slate-600 rounded-lg p-3 text-xs text-slate-300 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
           {tooltip}
         </div>
       )}

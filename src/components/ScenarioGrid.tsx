@@ -20,36 +20,36 @@ export default function ScenarioGrid({ currentPrice, sma, lowerBand }: Props) {
   const bestViable = scenarios.find(s => s.isViable);
 
   return (
-    <div className="bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden">
+    <div className="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden">
       {/* Header — always visible, click to toggle */}
       <button
         onClick={() => setIsOpen(o => !o)}
-        className="w-full px-5 py-4 flex items-center justify-between hover:bg-zinc-800/40 transition-colors"
+        className="w-full px-5 py-4 flex items-center justify-between hover:bg-slate-800/40 transition-colors"
       >
         <div className="text-left">
           <h3 className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">Scenario Comparison</h3>
           {!isOpen && bestViable && (
-            <p className="text-xs text-zinc-600 mt-0.5">
+            <p className="text-xs text-slate-600 mt-0.5">
               Best: Sell {bestViable.sellWeight}B → get {bestViable.buybackWeight}B back
               <span className="text-green-400 ml-1">(+{bestViable.netGoldGain}B)</span>
             </p>
           )}
           {!isOpen && !bestViable && (
-            <p className="text-xs text-zinc-600 mt-0.5">No viable sell scenarios at current price</p>
+            <p className="text-xs text-slate-600 mt-0.5">No viable sell scenarios at current price</p>
           )}
         </div>
         {isOpen
-          ? <ChevronUp className="w-4 h-4 text-zinc-500 flex-shrink-0" />
-          : <ChevronDown className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+          ? <ChevronUp className="w-4 h-4 text-slate-500 flex-shrink-0" />
+          : <ChevronDown className="w-4 h-4 text-slate-500 flex-shrink-0" />
         }
       </button>
 
       {/* Collapsible table */}
       {isOpen && (
-        <div className="border-t border-zinc-700 overflow-x-auto">
+        <div className="border-t border-slate-700 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-zinc-500 uppercase border-b border-zinc-800">
+              <tr className="text-xs text-slate-500 uppercase border-b border-slate-800">
                 <th className="text-left px-4 py-3">Scenario</th>
                 <th className="text-right px-4 py-3">Cash</th>
                 <th className="text-right px-4 py-3">Buy-back</th>
@@ -63,11 +63,11 @@ export default function ScenarioGrid({ currentPrice, sma, lowerBand }: Props) {
                 const isBest = s === bestViable;
                 return (
                   <tr key={i}
-                    className={`border-b border-zinc-800 ${isBest ? 'bg-green-900/15' : ''} hover:bg-zinc-800/30 transition-colors`}>
+                    className={`border-b border-slate-800 ${isBest ? 'bg-green-900/15' : ''} hover:bg-slate-800/30 transition-colors`}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         {isBest && <Trophy className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0" />}
-                        <span className="text-zinc-300 text-xs">{s.label}</span>
+                        <span className="text-slate-300 text-xs">{s.label}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right text-white font-medium">
@@ -75,15 +75,15 @@ export default function ScenarioGrid({ currentPrice, sma, lowerBand }: Props) {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <span className="text-white font-medium">{s.buybackWeight}B</span>
-                      <span className="text-xs text-zinc-500 ml-1">
+                      <span className="text-xs text-slate-500 ml-1">
                         ({s.buybackBricks.map(b => `${b}B`).join('+')})
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right text-zinc-400">
+                    <td className="px-4 py-3 text-right text-slate-400">
                       ฿{s.leftoverCash.toLocaleString()}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <span className={`font-bold ${s.netGoldGain > 0 ? 'text-green-400' : s.netGoldGain === 0 ? 'text-zinc-400' : 'text-red-400'}`}>
+                      <span className={`font-bold ${s.netGoldGain > 0 ? 'text-green-400' : s.netGoldGain === 0 ? 'text-slate-400' : 'text-red-400'}`}>
                         {s.netGoldGain > 0 ? '+' : ''}{s.netGoldGain}B
                       </span>
                     </td>
@@ -93,7 +93,7 @@ export default function ScenarioGrid({ currentPrice, sma, lowerBand }: Props) {
                           <TrendingUp className="inline w-3 h-3 mr-1" />Viable
                         </span>
                       ) : (
-                        <span className="text-xs bg-zinc-800 text-zinc-500 px-2 py-0.5 rounded-full">No gain</span>
+                        <span className="text-xs bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full">No gain</span>
                       )}
                     </td>
                   </tr>
