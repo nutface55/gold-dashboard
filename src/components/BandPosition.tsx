@@ -33,11 +33,11 @@ export default function BandPosition({ bandPosition, loading }: Props) {
   };
 
   const zoneLabels: Record<string, string> = {
-    strong_sell: 'ABOVE UPPER BAND — Strong Sell Zone',
-    mild_sell: 'ABOVE SMA — Mild Sell Zone',
-    hold: 'NEAR SMA — Hold',
-    hold_buy: 'BELOW SMA — Consider Buying',
-    strong_buy: 'NEAR LOWER BAND — Strong Buy Zone',
+    strong_sell: 'Above upper band — sell zone',
+    mild_sell: 'Above SMA — mild sell',
+    hold: 'Near SMA — hold',
+    hold_buy: 'Below SMA — consider buying',
+    strong_buy: 'Near lower band — strong buy',
   };
 
   return (

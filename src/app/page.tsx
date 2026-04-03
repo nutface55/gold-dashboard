@@ -232,19 +232,16 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* 1. Action Plan */}
+        {/* 1. Action Plan — hero decision card */}
         <ActionPlan plan={actionPlan} loading={loading} />
 
-        {/* 2. Band Position */}
-        <BandPosition bandPosition={bandPosition} loading={loading} />
-
-        {/* 3. Portfolio Metrics */}
+        {/* 2. Portfolio Metrics — how you're doing overall */}
         <PortfolioMetrics metrics={metrics} loading={loading} />
 
-        {/* 4. TradingView Chart */}
-        <TradingViewChart />
+        {/* 3. Band Position — why the signal is what it is */}
+        <BandPosition bandPosition={bandPosition} loading={loading} />
 
-        {/* 5. Cash Tracker */}
+        {/* 4. Cash Tracker — cash to deploy */}
         <CashTracker
           cashState={cashState}
           currentPrice={usePrice || avgBuyPrice}
@@ -254,7 +251,14 @@ export default function Dashboard() {
           onUpdate={() => loadAll(true)}
         />
 
-        {/* 6. Scenario Comparison */}
+        {/* 5. Lot Inventory — what you own */}
+        <LotTable
+          lots={lots}
+          currentSellPrice={usePrice || avgBuyPrice}
+          onUpdate={() => loadAll(true)}
+        />
+
+        {/* 6. Scenario Comparison — sell math detail */}
         {bands && usePrice > 0 && (
           <ScenarioGrid
             currentPrice={usePrice}
@@ -264,15 +268,11 @@ export default function Dashboard() {
           />
         )}
 
-        {/* 7. Lot Inventory */}
-        <LotTable
-          lots={lots}
-          currentSellPrice={usePrice || avgBuyPrice}
-          onUpdate={() => loadAll(true)}
-        />
-
-        {/* 8. Cycle History */}
+        {/* 7. Cycle History — track record */}
         <CycleHistory cycles={cycles} onUpdate={() => loadAll(true)} />
+
+        {/* 8. Live Chart — reference, at the bottom */}
+        <TradingViewChart />
 
         {lastUpdated && (
           <p className="text-center text-xs text-zinc-700 pb-4">

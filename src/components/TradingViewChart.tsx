@@ -4,8 +4,8 @@ export default function TradingViewChart() {
   return (
     <div className="bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden">
       <div className="px-5 py-4 border-b border-zinc-700">
-        <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">
-          Gold Thai 96.5% — Live Chart (MTS GLD965)
+        <h3 className="text-sm font-semibold text-zinc-200 border-l-2 border-yellow-500 pl-2">
+          Gold Thai 96.5% — Live Chart
         </h3>
       </div>
       <iframe

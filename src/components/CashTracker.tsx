@@ -82,9 +82,13 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, a
         )}
       </div>
 
-      <div className="text-3xl font-bold text-yellow-300 mb-4">
+      <div className={`text-3xl font-bold ${cashState && cashState.amount > 0 ? 'text-yellow-300' : 'text-zinc-600'}`}>
         ฿{(cashState?.amount || 0).toLocaleString()}
       </div>
+      {(!cashState || cashState.amount === 0) && (
+        <p className="text-xs text-zinc-600 mt-1 mb-4">No cash from sales — fully deployed in gold.</p>
+      )}
+      {cashState && cashState.amount > 0 && <div className="mb-4" />}
 
       {/* Brick affordability progress */}
       {cashState && cashState.amount > 0 && (() => {

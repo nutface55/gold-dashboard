@@ -69,7 +69,7 @@ export default function PortfolioMetrics({ metrics, loading }: Props) {
       </div>
 
       {/* Row 2: Strategic metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <MetricCard
           label="Profit per Baht"
           icon={<Sparkles className="w-4 h-4 text-emerald-400" />}
