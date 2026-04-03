@@ -297,7 +297,7 @@ export default function LotTable({ lots, currentSellPrice, onUpdate }: Props) {
               <div className="bg-zinc-900 rounded-lg p-3">
                 <div className="text-xs text-zinc-500 mb-1">Tradable P&L %</div>
                 <div className={`text-base font-bold ${tradablePnlPct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {tradablePnlPct >= 0 ? '+' : ''}{tradablePnlPct.toFixed(1)}%
+                  {tradablePnlPct >= 0 ? '+' : ''}{tradablePnlPct.toFixed(2)}%
                 </div>
               </div>
             </div>
