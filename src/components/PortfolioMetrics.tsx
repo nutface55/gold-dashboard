@@ -1,7 +1,7 @@
 'use client';
 
 import { PortfolioMetrics as MetricsType } from '@/lib/trading-rules';
-import { TrendingUp, TrendingDown, Target, Coins } from 'lucide-react';
+import { TrendingUp, TrendingDown, Target, Coins, ShieldAlert, Landmark, Trophy } from 'lucide-react';
 
 interface Props {
   metrics: MetricsType | null;
@@ -11,13 +11,15 @@ interface Props {
 export default function PortfolioMetrics({ metrics, loading }: Props) {
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 animate-pulse">
-        {[...Array(8)].map((_, i) => (
-          <div key={i} className="bg-zinc-900 border border-zinc-700 rounded-xl p-4">
-            <div className="h-3 bg-zinc-700 rounded w-20 mb-2" />
-            <div className="h-6 bg-zinc-700 rounded w-28" />
-          </div>
-        ))}
+      <div className="space-y-3 animate-pulse">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-zinc-900 border border-zinc-700 rounded-xl p-4">
+              <div className="h-3 bg-zinc-700 rounded w-20 mb-2" />
+              <div className="h-6 bg-zinc-700 rounded w-28" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -27,43 +29,73 @@ export default function PortfolioMetrics({ metrics, loading }: Props) {
   const pnlPositive = metrics.pnlAmount >= 0;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
+      {/* Row 1: Core metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <MetricCard
           label="Total Gold"
+          icon={<Coins className="w-4 h-4 text-yellow-400" />}
           value={`${metrics.totalWeight} baht`}
           sub={`${metrics.foreverWeight}B forever locked`}
-          icon={<Coins className="w-4 h-4 text-yellow-400" />}
+          tooltip="Total weight of gold you own. Forever locked = lots up 40%+ that we never sell."
         />
         <MetricCard
           label="Avg Buy Price"
-          value={`฿${metrics.avgBuyPrice.toLocaleString()}`}
-          sub="per baht"
           icon={<Target className="w-4 h-4 text-blue-400" />}
+          value={`฿${metrics.avgBuyPrice.toLocaleString()}`}
+          sub="per baht weight"
+          tooltip="Your average cost per baht of gold across all lots. The lower this is, the better."
         />
         <MetricCard
           label="Portfolio P&L"
-          value={`${pnlPositive ? '+' : ''}฿${metrics.pnlAmount.toLocaleString()}`}
-          sub={`${pnlPositive ? '+' : ''}${metrics.pnlPercent.toFixed(1)}%`}
           icon={pnlPositive
             ? <TrendingUp className="w-4 h-4 text-green-400" />
             : <TrendingDown className="w-4 h-4 text-red-400" />
           }
+          value={`${pnlPositive ? '+' : ''}฿${metrics.pnlAmount.toLocaleString()}`}
+          sub={`${pnlPositive ? '+' : ''}${metrics.pnlPercent.toFixed(1)}% total return`}
           valueColor={pnlPositive ? 'text-green-400' : 'text-red-400'}
+          tooltip="Profit & Loss — how much you've made (or lost) on paper vs. what you paid. Not real until you sell."
         />
         <MetricCard
           label="Current Value"
+          icon={<TrendingUp className="w-4 h-4 text-purple-400" />}
           value={`฿${metrics.currentValue.toLocaleString()}`}
           sub={`Invested ฿${metrics.totalInvested.toLocaleString()}`}
-          icon={<TrendingUp className="w-4 h-4 text-purple-400" />}
+          tooltip="What your gold is worth today at the current sell price."
         />
       </div>
 
-      {/* Progress bar to 150 baht */}
+      {/* Row 2: Strategic metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <MetricCard
+          label="Break-even Price"
+          icon={<ShieldAlert className="w-4 h-4 text-orange-400" />}
+          value={`฿${metrics.breakEvenPrice.toLocaleString()}`}
+          sub="per baht — don't sell below this"
+          tooltip="If gold drops below this price and you sell everything, you'd lose money. As long as the current price is above this, you're in profit."
+        />
+        <MetricCard
+          label="Cost to Reach 150B"
+          icon={<Landmark className="w-4 h-4 text-cyan-400" />}
+          value={`฿${metrics.costToTarget.toLocaleString()}`}
+          sub={`Need ${metrics.bricksToTarget} more baht of gold`}
+          tooltip="How much cash you'd need to inject today (at current price) to buy enough gold to hit your 150 baht target."
+        />
+        <MetricCard
+          label="Target Progress"
+          icon={<Trophy className="w-4 h-4 text-yellow-400" />}
+          value={`${metrics.totalWeight} / 150B`}
+          sub={`${metrics.bricksToTarget}B still to go`}
+          tooltip="How far along you are toward your 150 baht accumulation goal."
+        />
+      </div>
+
+      {/* Progress bar */}
       <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4">
         <div className="flex justify-between mb-2">
           <span className="text-sm font-semibold text-zinc-300">Progress to 150 baht target</span>
-          <span className="text-sm font-bold text-yellow-400">{metrics.totalWeight} / 150 baht ({metrics.progressTo150}%)</span>
+          <span className="text-sm font-bold text-yellow-400">{metrics.progressTo150}% complete</span>
         </div>
         <div className="h-4 bg-zinc-800 rounded-full overflow-hidden">
           <div
@@ -72,9 +104,9 @@ export default function PortfolioMetrics({ metrics, loading }: Props) {
           />
         </div>
         <div className="flex justify-between mt-1 text-xs text-zinc-500">
-          <span>0 baht</span>
-          <span>75 baht (halfway)</span>
-          <span>150 baht</span>
+          <span>0B</span>
+          <span>75B (halfway)</span>
+          <span>150B</span>
         </div>
       </div>
     </div>
@@ -82,26 +114,25 @@ export default function PortfolioMetrics({ metrics, loading }: Props) {
 }
 
 function MetricCard({
-  label,
-  value,
-  sub,
-  icon,
-  valueColor = 'text-white',
+  label, value, sub, icon, valueColor = 'text-white', tooltip,
 }: {
-  label: string;
-  value: string;
-  sub?: string;
-  icon?: React.ReactNode;
-  valueColor?: string;
+  label: string; value: string; sub?: string;
+  icon?: React.ReactNode; valueColor?: string; tooltip?: string;
 }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4">
+    <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 group relative">
       <div className="flex items-center gap-2 mb-2">
         {icon}
         <span className="text-xs text-zinc-500 uppercase tracking-wide">{label}</span>
       </div>
       <div className={`text-lg font-bold ${valueColor}`}>{value}</div>
       {sub && <div className="text-xs text-zinc-500 mt-1">{sub}</div>}
+      {/* Tooltip on hover */}
+      {tooltip && (
+        <div className="absolute bottom-full left-0 mb-2 w-64 bg-zinc-800 border border-zinc-600 rounded-lg p-3 text-xs text-zinc-300 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
+          {tooltip}
+        </div>
+      )}
     </div>
   );
 }

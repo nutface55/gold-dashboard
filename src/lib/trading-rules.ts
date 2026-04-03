@@ -20,6 +20,9 @@ export interface PortfolioMetrics {
   foreverWeight: number;
   tradableWeight: number;
   progressTo150: number;
+  breakEvenPrice: number;       // price needed to recover full investment
+  costToTarget: number;         // cash needed to reach 150B at current price
+  bricksToTarget: number;       // how many baht of gold still needed
 }
 
 export interface CashState {
@@ -55,6 +58,9 @@ export function computePortfolioMetrics(lots: Lot[], currentBuyPrice: number): P
     .filter(l => isForeverLot(l, currentBuyPrice))
     .reduce((s, l) => s + l.weight, 0);
 
+  const bricksToTarget = Math.max(0, 150 - totalWeight);
+  const costToTarget = bricksToTarget * currentBuyPrice;
+
   return {
     totalWeight,
     totalInvested,
@@ -65,6 +71,9 @@ export function computePortfolioMetrics(lots: Lot[], currentBuyPrice: number): P
     foreverWeight,
     tradableWeight: totalWeight - foreverWeight,
     progressTo150: Math.round((totalWeight / 150) * 100),
+    breakEvenPrice: avgBuyPrice,
+    costToTarget,
+    bricksToTarget,
   };
 }
 
@@ -106,8 +115,8 @@ export function generateActionPlan(
       const best = scenarios[0];
       return {
         signal: 'buy_back',
-        headline: `Buy back ${best.buybackWeight}B gold — buy-back triggered`,
-        detail: `You have ฿${cashState.amount.toLocaleString()} cash from a sale ${daysSinceSale} days ago. Buy ${best.buybackBricks.map(b => `${b}B`).join(' + ')} at current price ฿${bandPosition.currentPrice.toLocaleString()}.`,
+        headline: `Buy back ${best.buybackWeight}B gold now`,
+        detail: `You have ฿${cashState.amount.toLocaleString()} sitting from your sale ${daysSinceSale} days ago. Gold has dropped enough — buy ${best.buybackBricks.map(b => `${b}B`).join(' + ')} at ฿${bandPosition.currentPrice.toLocaleString()} and you'll end up with more gold than you sold.\n\n📊 Technical: Price is near the SMA (20-day average price) — historically a good re-entry point.`,
         mathVerification: formatMathVerification(best, bandPosition.currentPrice),
         bestScenario: best,
         daysSinceSale,
@@ -115,11 +124,10 @@ export function generateActionPlan(
       };
     }
 
-    // Cash exists but no good buy-back scenario yet
     return {
       signal: 'buy_back',
-      headline: `Waiting for dip — ฿${cashState.amount.toLocaleString()} cash ready`,
-      detail: `Day ${daysSinceSale} of 30. Target prices: Tier 1 ฿${Math.round(bandPosition.currentPrice * 0.95).toLocaleString()}, Tier 2 ฿${bandPosition.sma.toLocaleString()} (SMA), Tier 3 ฿${bandPosition.lowerBand.toLocaleString()} (lower band).`,
+      headline: `Hold your cash — waiting for a better price`,
+      detail: `You have ฿${cashState.amount.toLocaleString()} ready. Gold hasn't dropped enough yet to buy back more than you sold. Be patient.\n\n📊 Technical: Waiting for price to reach Tier 1 ฿${Math.round(bandPosition.currentPrice * 0.95).toLocaleString()} (−5%), Tier 2 ฿${bandPosition.sma.toLocaleString()} (SMA / 20-day average), or Tier 3 ฿${bandPosition.lowerBand.toLocaleString()} (lower Bollinger Band).`,
       daysSinceSale,
       cashWarning,
     };
@@ -129,10 +137,11 @@ export function generateActionPlan(
   if (zone === 'strong_sell' && pnlPercent >= 15) {
     const scenarios = calculateScenarios(bandPosition.currentPrice, bandPosition.sma, bandPosition.lowerBand);
     const best = scenarios.find(s => s.isViable && s.sellWeight === 10);
+    const dropToSma = Math.round((1 - bandPosition.sma / bandPosition.currentPrice) * 100);
     return {
       signal: 'strong_sell',
-      headline: 'Sell a 10B brick today — strong sell signal',
-      detail: `Price is ${bandPosition.percentAboveSma.toFixed(1)}% above SMA and above upper Bollinger Band. Portfolio P&L: ${pnlPercent.toFixed(1)}%. Sell now and wait for a ${Math.round((1 - bandPosition.sma / bandPosition.currentPrice) * 100)}% dip to buy back more.`,
+      headline: 'Sell a 10B brick — gold is expensive right now',
+      detail: `Gold is at a recent high. If you sell now at ฿${bandPosition.currentPrice.toLocaleString()} and wait for it to drop back down, you can buy back more gold than you sold — ending up with a bigger pile for free.\n\n📊 Technical: Price is above the upper Bollinger Band (unusually high vs. the last 20 days) and portfolio P&L is ${pnlPercent.toFixed(1)}%. A drop of ~${dropToSma}% back to the 20-day average (฿${bandPosition.sma.toLocaleString()}) is expected.`,
       mathVerification: best ? formatMathVerification(best, bandPosition.sma) : undefined,
       bestScenario: best,
     };
@@ -143,8 +152,8 @@ export function generateActionPlan(
     const best = scenarios.find(s => s.isViable && s.sellWeight === 5);
     return {
       signal: 'mild_sell',
-      headline: 'Sell a 5B brick — mild sell signal',
-      detail: `Price is ${bandPosition.percentAboveSma.toFixed(1)}% above SMA. Portfolio P&L: ${pnlPercent.toFixed(1)}%. Consider selling a 5B brick.`,
+      headline: 'Consider selling a 5B brick — price is above average',
+      detail: `Gold is a little above its recent average price. Not a screaming sell, but selling a 5B brick now and waiting to buy back cheaper could get you more gold.\n\n📊 Technical: Price is ${bandPosition.percentAboveSma.toFixed(1)}% above the SMA (20-day average ฿${bandPosition.sma.toLocaleString()}). Portfolio profit is ${pnlPercent.toFixed(1)}%.`,
       mathVerification: best ? formatMathVerification(best, bandPosition.sma) : undefined,
       bestScenario: best,
     };
@@ -155,8 +164,8 @@ export function generateActionPlan(
     const impact5 = calculateInjectionImpact(portfolioMetrics.totalWeight, avgBuyPrice, 5, bandPosition.currentPrice);
     return {
       signal: 'cash_injection',
-      headline: 'Consider buying more — strong buy zone',
-      detail: `Price (฿${bandPosition.currentPrice.toLocaleString()}) is ${bandPosition.currentPrice < avgBuyPrice ? `฿${(avgBuyPrice - bandPosition.currentPrice).toLocaleString()} BELOW` : 'near'} your avg buy price (฿${avgBuyPrice.toLocaleString()}). Adding a 5B brick would drop your avg to ฿${impact5.newAvgBuyPrice.toLocaleString()} (↓฿${impact5.avgDrop.toLocaleString()}).`,
+      headline: 'Good time to buy more gold with fresh cash',
+      detail: `Gold is ${bandPosition.currentPrice < avgBuyPrice ? `฿${(avgBuyPrice - bandPosition.currentPrice).toLocaleString()} cheaper than your average purchase price` : 'near its recent low'}. Buying a 5B brick now at ฿${bandPosition.currentPrice.toLocaleString()} would bring your average cost down from ฿${avgBuyPrice.toLocaleString()} to ฿${impact5.newAvgBuyPrice.toLocaleString()} — saving ฿${impact5.avgDrop.toLocaleString()} per baht.\n\n📊 Technical: Price is ${bandPosition.currentPrice < avgBuyPrice ? 'below your portfolio average (strong accumulation signal)' : 'near the lower Bollinger Band — historically a bounce zone'}.`,
       injectionImpact: impact5,
     };
   }
@@ -165,8 +174,8 @@ export function generateActionPlan(
     const impact5 = calculateInjectionImpact(portfolioMetrics.totalWeight, avgBuyPrice, 5, bandPosition.currentPrice);
     return {
       signal: 'hold_buy',
-      headline: 'Hold — consider cash injection if available',
-      detail: `Price is below SMA. A 5B brick injection at ฿${bandPosition.currentPrice.toLocaleString()} would drop your avg to ฿${impact5.newAvgBuyPrice.toLocaleString()}.`,
+      headline: 'Hold — but worth buying if you have spare cash',
+      detail: `Gold is below its recent average — not the lowest it's been, but decent value. If you have cash available, a 5B brick at ฿${bandPosition.currentPrice.toLocaleString()} would pull your average cost down to ฿${impact5.newAvgBuyPrice.toLocaleString()}.\n\n📊 Technical: Price is below the SMA (20-day average ฿${bandPosition.sma.toLocaleString()}) — meaning gold is cheaper than it has been recently.`,
       injectionImpact: impact5,
     };
   }
@@ -174,7 +183,7 @@ export function generateActionPlan(
   // Default: Hold
   return {
     signal: 'hold',
-    headline: 'Hold — price is mid-range, no action needed',
-    detail: `Price is ${bandPosition.percentAboveSma > 0 ? `${bandPosition.percentAboveSma.toFixed(1)}% above` : `${Math.abs(bandPosition.percentAboveSma).toFixed(1)}% below`} SMA. Portfolio P&L: ${pnlPercent.toFixed(1)}%. Wait for a clearer signal.`,
+    headline: 'Do nothing — gold is fairly priced right now',
+    detail: `Gold is sitting in the middle of its normal range — not cheap enough to rush to buy, not expensive enough to sell. Just hold and wait for a clearer move.\n\n📊 Technical: Price is ${bandPosition.percentAboveSma > 0 ? `${bandPosition.percentAboveSma.toFixed(1)}% above` : `${Math.abs(bandPosition.percentAboveSma).toFixed(1)}% below`} the SMA (20-day average ฿${bandPosition.sma.toLocaleString()}). Portfolio profit: ${pnlPercent.toFixed(1)}%.`,
   };
 }
