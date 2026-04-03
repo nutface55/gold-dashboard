@@ -1,7 +1,7 @@
 'use client';
 
 import { PortfolioMetrics as MetricsType } from '@/lib/trading-rules';
-import { TrendingUp, TrendingDown, Target, Coins, ShieldAlert, Landmark, Trophy } from 'lucide-react';
+import { TrendingUp, TrendingDown, Target, Coins, Sparkles, Landmark, Trophy } from 'lucide-react';
 
 interface Props {
   metrics: MetricsType | null;
@@ -69,11 +69,12 @@ export default function PortfolioMetrics({ metrics, loading }: Props) {
       {/* Row 2: Strategic metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <MetricCard
-          label="Break-even Price"
-          icon={<ShieldAlert className="w-4 h-4 text-orange-400" />}
-          value={`฿${metrics.breakEvenPrice.toLocaleString()}`}
-          sub="per baht — don't sell below this"
-          tooltip="If gold drops below this price and you sell everything, you'd lose money. As long as the current price is above this, you're in profit."
+          label="Profit per Baht"
+          icon={<Sparkles className="w-4 h-4 text-emerald-400" />}
+          value={`${metrics.unrealisedProfitPerBaht >= 0 ? '+' : ''}฿${metrics.unrealisedProfitPerBaht.toLocaleString()}`}
+          sub="per baht weight held"
+          valueColor={metrics.unrealisedProfitPerBaht >= 0 ? 'text-emerald-400' : 'text-red-400'}
+          tooltip="For every 1 baht of gold you own, this is how much profit you're sitting on right now. Multiply by your total gold to get your full unrealised gain. It goes up when gold rises, down when it falls."
         />
         <MetricCard
           label="Cost to Reach 150B"

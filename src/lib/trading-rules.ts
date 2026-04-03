@@ -20,9 +20,9 @@ export interface PortfolioMetrics {
   foreverWeight: number;
   tradableWeight: number;
   progressTo150: number;
-  breakEvenPrice: number;       // price needed to recover full investment
-  costToTarget: number;         // cash needed to reach 150B at current price
-  bricksToTarget: number;       // how many baht of gold still needed
+  unrealisedProfitPerBaht: number; // profit per baht weight at current price
+  costToTarget: number;            // cash needed to reach 150B at current price
+  bricksToTarget: number;          // how many baht of gold still needed
 }
 
 export interface CashState {
@@ -60,6 +60,7 @@ export function computePortfolioMetrics(lots: Lot[], currentBuyPrice: number): P
 
   const bricksToTarget = Math.max(0, 150 - totalWeight);
   const costToTarget = bricksToTarget * currentBuyPrice;
+  const unrealisedProfitPerBaht = currentBuyPrice - avgBuyPrice;
 
   return {
     totalWeight,
@@ -71,7 +72,7 @@ export function computePortfolioMetrics(lots: Lot[], currentBuyPrice: number): P
     foreverWeight,
     tradableWeight: totalWeight - foreverWeight,
     progressTo150: Math.round((totalWeight / 150) * 100),
-    breakEvenPrice: avgBuyPrice,
+    unrealisedProfitPerBaht,
     costToTarget,
     bricksToTarget,
   };
