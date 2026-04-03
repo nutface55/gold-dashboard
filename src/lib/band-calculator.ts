@@ -95,11 +95,10 @@ export function generateSyntheticHistory(
   const prices: number[] = [];
   const trend = (currentPrice - avgBuyPrice) / days;
 
+  // Deterministic straight-line interpolation — no random noise
+  // Bands will be stable until enough real price history accumulates in the DB
   for (let i = days; i >= 0; i--) {
-    const base = avgBuyPrice + trend * (days - i);
-    // Add some noise (±2%)
-    const noise = base * 0.02 * (Math.random() - 0.5);
-    prices.push(Math.round(base + noise));
+    prices.push(Math.round(avgBuyPrice + trend * (days - i)));
   }
   return prices;
 }
