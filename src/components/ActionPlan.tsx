@@ -1,7 +1,7 @@
 'use client';
 
 import { ActionPlan as ActionPlanType } from '@/lib/trading-rules';
-import { AlertTriangle, TrendingDown, TrendingUp, Minus, DollarSign, Clock } from 'lucide-react';
+import { AlertTriangle, TrendingDown, TrendingUp, Minus, DollarSign, Clock, ArrowRight } from 'lucide-react';
 
 interface Props {
   plan: ActionPlanType | null;
@@ -37,19 +37,26 @@ const signalConfig = {
     label: 'BUY BACK',
     iconColor: 'text-blue-400',
   },
+  strong_buy: {
+    bg: 'bg-green-950 border-green-500',
+    badge: 'bg-green-500 text-white',
+    icon: TrendingUp,
+    label: 'STRONG BUY',
+    iconColor: 'text-green-400',
+  },
+  mild_buy: {
+    bg: 'bg-teal-950 border-teal-500',
+    badge: 'bg-teal-500 text-white',
+    icon: TrendingUp,
+    label: 'MILD BUY',
+    iconColor: 'text-teal-400',
+  },
   cash_injection: {
     bg: 'bg-green-950 border-green-500',
     badge: 'bg-green-500 text-white',
     icon: TrendingUp,
     label: 'BUY MORE',
     iconColor: 'text-green-400',
-  },
-  hold_buy: {
-    bg: 'bg-teal-950 border-teal-500',
-    badge: 'bg-teal-600 text-white',
-    icon: TrendingUp,
-    label: 'HOLD / BUY',
-    iconColor: 'text-teal-400',
   },
 };
 
@@ -83,8 +90,22 @@ export default function ActionPlan({ plan, loading }: Props) {
       </div>
 
       <h2 className="text-xl font-bold text-white mb-2">{plan.headline}</h2>
-      <p className="text-sm text-zinc-300 mb-4">{plan.detail}</p>
+      <p className="text-sm text-zinc-300 mb-4 whitespace-pre-line">{plan.detail}</p>
 
+      {/* Sell → Rebuy preview — shown on all sell signals */}
+      {plan.rebuySummary && (
+        <div className="bg-black/40 rounded-lg p-4 mt-3 border border-yellow-800">
+          <div className="flex items-center gap-2 mb-2">
+            <ArrowRight className="w-4 h-4 text-yellow-400" />
+            <span className="text-xs font-semibold text-yellow-400 uppercase tracking-wide">Sell → Rebuy Preview</span>
+          </div>
+          <pre className="text-xs text-yellow-200 font-mono whitespace-pre-wrap leading-relaxed">
+            {plan.rebuySummary}
+          </pre>
+        </div>
+      )}
+
+      {/* Math verification */}
       {plan.mathVerification && (
         <div className="bg-black/40 rounded-lg p-4 mt-3 border border-zinc-700">
           <div className="flex items-center gap-2 mb-2">
@@ -94,16 +115,6 @@ export default function ActionPlan({ plan, loading }: Props) {
           <pre className="text-xs text-green-300 font-mono whitespace-pre-wrap leading-relaxed">
             {plan.mathVerification}
           </pre>
-        </div>
-      )}
-
-      {plan.injectionImpact && (
-        <div className="bg-black/40 rounded-lg p-4 mt-3 border border-green-800">
-          <p className="text-xs text-green-400 font-semibold mb-1">If you add a 5B brick now:</p>
-          <p className="text-sm text-white">
-            Avg drops from ฿{plan.injectionImpact.newAvgBuyPrice.toLocaleString()}
-            {' '}(saves ฿{plan.injectionImpact.avgDrop.toLocaleString()}/baht)
-          </p>
         </div>
       )}
 
