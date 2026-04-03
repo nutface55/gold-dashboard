@@ -276,7 +276,7 @@ export default function Dashboard() {
         />
 
         {/* 8. Cycle History */}
-        <CycleHistory cycles={cycles} />
+        <CycleHistory cycles={cycles} onUpdate={() => loadAll(true)} />
 
         {lastUpdated && (
           <p className="text-center text-xs text-zinc-700 pb-4">

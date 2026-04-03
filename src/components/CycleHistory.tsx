@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, CheckCircle, Clock } from 'lucide-react';
+import { ArrowRight, CheckCircle, Clock, Trash2 } from 'lucide-react';
 
 interface Buyback {
   id: number;
@@ -22,9 +22,16 @@ interface Cycle {
 
 interface Props {
   cycles: Cycle[];
+  onUpdate: () => void;
 }
 
-export default function CycleHistory({ cycles }: Props) {
+export default function CycleHistory({ cycles, onUpdate }: Props) {
+  async function deleteCycle(id: number) {
+    if (!confirm('Delete this sale record? This will also reverse any cash balance from this sale.')) return;
+    await fetch(`/api/cycles/${id}`, { method: 'DELETE' });
+    onUpdate();
+  }
+
   if (cycles.length === 0) {
     return (
       <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-5">
@@ -60,11 +67,20 @@ export default function CycleHistory({ cycles }: Props) {
                     {cycle.status}
                   </span>
                 </div>
-                {cycle.status === 'closed' && (
-                  <span className={`text-sm font-bold ${netGold > 0 ? 'text-green-400' : 'text-zinc-400'}`}>
-                    Net: {netGold > 0 ? '+' : ''}{netGold}B
-                  </span>
-                )}
+                <div className="flex items-center gap-3">
+                  {cycle.status === 'closed' && (
+                    <span className={`text-sm font-bold ${netGold > 0 ? 'text-green-400' : 'text-zinc-400'}`}>
+                      Net: {netGold > 0 ? '+' : ''}{netGold}B
+                    </span>
+                  )}
+                  <button
+                    onClick={() => deleteCycle(cycle.id)}
+                    className="text-zinc-600 hover:text-red-400 transition-colors"
+                    title="Delete this record"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               <div className="flex items-center gap-3 text-sm">
