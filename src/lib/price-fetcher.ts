@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 export interface GoldPrice {
-  barBuy: number;    // shop sells to you (you buy at this price)
-  barSell: number;   // shop buys from you (you sell at this price)
+  barBuy: number;    // price you pay to buy from shop
+  barSell: number;   // price shop pays you when you sell
   ornamentBuy: number;
   ornamentSell: number;
   source: string;
@@ -10,39 +10,9 @@ export interface GoldPrice {
   raw?: unknown;
 }
 
-// Primary: thaigold.info direct JSON
-async function fetchFromThaigold(): Promise<GoldPrice | null> {
-  try {
-    const { data } = await axios.get('http://www.thaigold.info/RealTimeDataV2/gtdata_.json', {
-      timeout: 8000,
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-    });
-
-    // The JSON has an array; first item is usually the current price
-    // Fields: BuyBarPrice, SellBarPrice, BuyOrnamentPrice, SellOrnamentPrice
-    const item = Array.isArray(data) ? data[0] : data;
-    const barBuy = parseFloat(item?.BuyBarPrice || item?.buyBarPrice || 0);
-    const barSell = parseFloat(item?.SellBarPrice || item?.sellBarPrice || 0);
-    const ornBuy = parseFloat(item?.BuyOrnamentPrice || item?.buyOrnamentPrice || 0);
-    const ornSell = parseFloat(item?.SellOrnamentPrice || item?.sellOrnamentPrice || 0);
-
-    if (!barBuy || !barSell) return null;
-
-    return {
-      barBuy,
-      barSell,
-      ornamentBuy: ornBuy,
-      ornamentSell: ornSell,
-      source: 'thaigold.info',
-      timestamp: new Date().toISOString(),
-      raw: item,
-    };
-  } catch {
-    return null;
-  }
-}
-
-// Secondary: community API (chnwt.dev)
+// Primary: api.chnwt.dev — clean JSON, correct current prices
+// Response: { response: { price: { gold_bar: { buy: "72,000.00", sell: "72,200.00" } } } }
+// "buy" = shop buys from you (barSell), "sell" = shop sells to you (barBuy)
 async function fetchFromChnwt(): Promise<GoldPrice | null> {
   try {
     const { data } = await axios.get('https://api.chnwt.dev/thai-gold-api/latest', {
@@ -50,26 +20,62 @@ async function fetchFromChnwt(): Promise<GoldPrice | null> {
       headers: { 'User-Agent': 'Mozilla/5.0' },
     });
 
-    // Response: { data: { price: { bar: { buy, sell }, ornament: { buy, sell } } } }
-    const price = data?.data?.price || data?.price;
-    const bar = price?.bar || price?.['96.5'];
-    const orn = price?.ornament || price?.['96.5_ornament'];
+    const bar = data?.response?.price?.gold_bar;
+    const orn = data?.response?.price?.gold;
 
-    const barBuy = parseFloat(bar?.buy || bar?.sell_price || 0);
-    const barSell = parseFloat(bar?.sell || bar?.buy_price || 0);
-    const ornBuy = parseFloat(orn?.buy || 0);
-    const ornSell = parseFloat(orn?.sell || 0);
+    const barSell = parseFloat(String(bar?.buy || '0').replace(/,/g, ''));
+    const barBuy  = parseFloat(String(bar?.sell || '0').replace(/,/g, ''));
+    const ornSell = parseFloat(String(orn?.buy  || '0').replace(/,/g, ''));
+    const ornBuy  = parseFloat(String(orn?.sell || '0').replace(/,/g, ''));
 
     if (!barBuy || !barSell) return null;
 
     return {
       barBuy,
       barSell,
-      ornamentBuy: ornBuy,
-      ornamentSell: ornSell,
+      ornamentBuy: ornBuy || barBuy,
+      ornamentSell: ornSell || barSell,
       source: 'api.chnwt.dev',
       timestamp: new Date().toISOString(),
-      raw: data,
+      raw: data?.response,
+    };
+  } catch {
+    return null;
+  }
+}
+
+// Secondary: thaigold.info — array of { name, bid, ask }
+// "สมาคมฯ" = GTA prices, "96.5%" = 96.5% bar prices
+async function fetchFromThaigold(): Promise<GoldPrice | null> {
+  try {
+    const { data } = await axios.get('http://www.thaigold.info/RealTimeDataV2/gtdata_.json', {
+      timeout: 8000,
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+    });
+
+    if (!Array.isArray(data)) return null;
+
+    // Find the 96.5% bar entry or GTA association entry
+    const bar96 = data.find((d: { name: string }) => d.name === '96.5%');
+    const gta   = data.find((d: { name: string }) => d.name === 'สมาคมฯ');
+    const entry = bar96 || gta;
+
+    if (!entry) return null;
+
+    const barSell = parseFloat(String(entry.bid).replace(/,/g, ''));
+    const barBuy  = parseFloat(String(entry.ask).replace(/,/g, ''));
+
+    // Sanity check: current Thai gold should be between 50,000 and 200,000
+    if (!barBuy || !barSell || barBuy < 50000 || barBuy > 200000) return null;
+
+    return {
+      barBuy,
+      barSell,
+      ornamentBuy: barBuy,
+      ornamentSell: barSell,
+      source: 'thaigold.info',
+      timestamp: new Date().toISOString(),
+      raw: entry,
     };
   } catch {
     return null;
@@ -92,26 +98,24 @@ async function fetchFromGoldtraders(): Promise<GoldPrice | null> {
     const $ = cheerio.load(html);
     const prices: number[] = [];
 
-    // Try to find price elements
     $('td, span, div').each((_, el) => {
       const text = $(el).text().trim().replace(/,/g, '');
       const num = parseFloat(text);
-      if (num > 50000 && num < 200000) {
+      if (num >= 50000 && num <= 200000) {
         prices.push(num);
       }
     });
 
     if (prices.length < 2) return null;
 
-    // Sort and pick the reasonable ones
     const sorted = [...new Set(prices)].sort((a, b) => a - b);
-    const barSell = sorted[0];  // lower = shop buys from you
-    const barBuy = sorted[1] || sorted[0] + 300;  // higher = shop sells to you
+    const barSell = sorted[0];
+    const barBuy  = sorted[1] || sorted[0] + 200;
 
     return {
       barBuy,
       barSell,
-      ornamentBuy: barBuy - 500,
+      ornamentBuy: barBuy,
       ornamentSell: barSell,
       source: 'goldtraders.or.th',
       timestamp: new Date().toISOString(),
@@ -122,8 +126,7 @@ async function fetchFromGoldtraders(): Promise<GoldPrice | null> {
 }
 
 export async function fetchCurrentGoldPrice(): Promise<GoldPrice> {
-  // Try sources in order
-  const sources = [fetchFromThaigold, fetchFromChnwt, fetchFromGoldtraders];
+  const sources = [fetchFromChnwt, fetchFromThaigold, fetchFromGoldtraders];
 
   for (const fetchFn of sources) {
     const result = await fetchFn();
@@ -132,7 +135,6 @@ export async function fetchCurrentGoldPrice(): Promise<GoldPrice> {
     }
   }
 
-  // If all fail, return a placeholder
   return {
     barBuy: 0,
     barSell: 0,
