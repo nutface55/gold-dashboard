@@ -3,9 +3,13 @@ import { neon, NeonQueryFunction } from '@neondatabase/serverless';
 let _db: NeonQueryFunction<false, false> | null = null;
 
 export function getDb(): NeonQueryFunction<false, false> {
-  const connectionString = process.env.DATABASE_URL;
+  // Vercel Storage (Neon) may use POSTGRES_URL or DATABASE_URL depending on how it was connected
+  const connectionString =
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.POSTGRES_URL_NON_POOLING;
   if (!connectionString) {
-    throw new Error('DATABASE_URL environment variable is not set');
+    throw new Error('No database connection string found (DATABASE_URL / POSTGRES_URL)');
   }
   if (!_db) {
     _db = neon(connectionString);
