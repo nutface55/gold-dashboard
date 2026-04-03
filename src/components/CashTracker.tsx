@@ -9,10 +9,11 @@ interface Props {
   currentPrice: number;
   sma: number;
   lowerBand: number;
+  avgBuyPrice: number;
   onUpdate: () => void;
 }
 
-export default function CashTracker({ cashState, currentPrice, sma, lowerBand, onUpdate }: Props) {
+export default function CashTracker({ cashState, currentPrice, sma, lowerBand, avgBuyPrice, onUpdate }: Props) {
   const [showSaleModal, setShowSaleModal] = useState(false);
   const [showBuybackModal, setShowBuybackModal] = useState(false);
   const [saleForm, setSaleForm] = useState({ date: '', weight: '10', price: String(currentPrice) });
@@ -84,6 +85,64 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, o
       <div className="text-3xl font-bold text-white mb-4">
         ฿{(cashState?.amount || 0).toLocaleString()}
       </div>
+
+      {/* Brick affordability progress */}
+      {cashState && cashState.amount > 0 && (() => {
+        const cash = cashState.amount;
+        const cost5 = 5 * currentPrice;
+        const cost10 = 10 * currentPrice;
+        const pct5 = Math.min(cash / cost5, 1);
+        const pct10 = Math.min(cash / cost10, 1);
+        const can5 = cash >= cost5;
+        const can10 = cash >= cost10;
+        // profit portion: cash above what the sold gold originally cost
+        // (approximation using portfolio avg buy price × bricks implied by cash)
+        const impliedBricks = cash / currentPrice;
+        const costBasis = impliedBricks * avgBuyPrice;
+        const profitInCash = Math.max(0, cash - costBasis);
+        const profitCovers5 = profitInCash >= cost5;
+
+        return (
+          <div className="mb-4 space-y-3">
+            <p className="text-xs text-zinc-500 uppercase tracking-wide">Brick buying power</p>
+
+            {/* 5B bar */}
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-xs text-zinc-400">5B brick (฿{cost5.toLocaleString()})</span>
+                <span className={`text-xs font-semibold ${can5 ? 'text-green-400' : 'text-zinc-400'}`}>
+                  {can5 ? '✓ Ready' : `฿${(cost5 - cash).toLocaleString()} short`}
+                </span>
+              </div>
+              <div className="h-2 bg-zinc-700 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${can5 ? 'bg-green-500' : 'bg-blue-500'}`}
+                  style={{ width: `${pct5 * 100}%` }}
+                />
+              </div>
+              {can5 && profitCovers5 && (
+                <p className="text-xs text-green-500 mt-1">Funded entirely by profit — principal untouched.</p>
+              )}
+            </div>
+
+            {/* 10B bar */}
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-xs text-zinc-400">10B brick (฿{cost10.toLocaleString()})</span>
+                <span className={`text-xs font-semibold ${can10 ? 'text-green-400' : 'text-zinc-400'}`}>
+                  {can10 ? '✓ Ready' : `฿${(cost10 - cash).toLocaleString()} short`}
+                </span>
+              </div>
+              <div className="h-2 bg-zinc-700 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${can10 ? 'bg-green-500' : 'bg-blue-500'}`}
+                  style={{ width: `${pct10 * 100}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {cashState && cashState.amount > 0 && (
         <div className="space-y-2 mb-4">

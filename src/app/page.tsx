@@ -249,6 +249,7 @@ export default function Dashboard() {
           currentPrice={usePrice || avgBuyPrice}
           sma={bands?.sma || avgBuyPrice}
           lowerBand={bands?.lowerBand || Math.round(avgBuyPrice * 0.94)}
+          avgBuyPrice={avgBuyPrice}
           onUpdate={() => loadAll(true)}
         />
 
