@@ -5,22 +5,26 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
 
-    // Delete buybacks first (foreign key), then refund cash, then delete cycle
+    // Delete buybacks first
     await query(`DELETE FROM cycle_buybacks WHERE cycle_id = $1`, [id]);
 
-    // Get the cash that was generated so we can reverse it
+    // Get cycle info to reverse cash if still open
     const cycle = await query<{ cash_generated: number; status: string }>(
       `SELECT cash_generated, status FROM cycles WHERE id = $1`, [id]
     );
 
     if (cycle.length > 0 && cycle[0].status === 'open') {
-      // Deduct the pending cash from cash_state
       await query(
-        `UPDATE cash_state SET amount = GREATEST(0, amount - $1), updated_at = NOW()
+        `UPDATE cash_state SET amount = GREATEST(0, amount - $1), source_cycle_id = NULL, sale_date = NULL, updated_at = NOW()
          WHERE id = (SELECT id FROM cash_state LIMIT 1)`,
         [cycle[0].cash_generated]
       );
     }
+
+    // Clear foreign key reference in cash_state before deleting cycle
+    await query(
+      `UPDATE cash_state SET source_cycle_id = NULL WHERE source_cycle_id = $1`, [id]
+    );
 
     await query(`DELETE FROM cycles WHERE id = $1`, [id]);
 
