@@ -231,19 +231,19 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* 1. ACTION PLAN */}
+        {/* 1. Action Plan */}
         <ActionPlan plan={actionPlan} loading={loading} />
 
         {/* 2. Band Position */}
         <BandPosition bandPosition={bandPosition} loading={loading} />
 
-        {/* 3. TradingView Chart */}
-        <TradingViewChart />
-
-        {/* 4. Portfolio Metrics */}
+        {/* 3. Portfolio Metrics */}
         <PortfolioMetrics metrics={metrics} loading={loading} />
 
-        {/* 4. Cash Tracker */}
+        {/* 4. TradingView Chart */}
+        <TradingViewChart />
+
+        {/* 5. Cash Tracker */}
         <CashTracker
           cashState={cashState}
           currentPrice={usePrice || avgBuyPrice}
@@ -252,7 +252,7 @@ export default function Dashboard() {
           onUpdate={() => loadAll(true)}
         />
 
-        {/* 5. Scenario Grid */}
+        {/* 6. Scenario Comparison */}
         {bands && usePrice > 0 && (
           <ScenarioGrid
             currentPrice={usePrice}
@@ -262,7 +262,7 @@ export default function Dashboard() {
           />
         )}
 
-        {/* 6. Lot Inventory */}
+        {/* 7. Lot Inventory */}
         <LotTable
           lots={lots}
           currentSellPrice={usePrice || avgBuyPrice}
