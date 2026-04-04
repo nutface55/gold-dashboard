@@ -14,6 +14,13 @@ import CycleHistory from '@/components/CycleHistory';
 import { GoldPrice } from '@/lib/price-fetcher';
 import { Lot, CashState, computePortfolioMetrics, generateActionPlan } from '@/lib/trading-rules';
 import { calculateBollingerBands, getBandPosition, generateSyntheticHistory, BandData, BandPosition as BandPositionType } from '@/lib/band-calculator';
+interface MarketData {
+  usdSpot: number | null;
+  usdThb: number | null;
+  impliedThbPerBaht: number | null;
+  source: string;
+  fetchedAt: string;
+}
 
 // Seed lots for when DB isn't initialized yet
 const SEED_LOTS: Lot[] = [
@@ -44,6 +51,7 @@ export default function Dashboard() {
   const [dbError, setDbError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [initAttempted, setInitAttempted] = useState(false);
+  const [market, setMarket] = useState<MarketData | null>(null);
 
   const fetchPrice = async (): Promise<GoldPrice | null> => {
     try {
@@ -76,6 +84,14 @@ export default function Dashboard() {
       if (!res.ok) return [];
       return await res.json();
     } catch { return []; }
+  };
+
+  const fetchMarket = async (): Promise<MarketData | null> => {
+    try {
+      const res = await fetch('/api/market');
+      if (!res.ok) return null;
+      return await res.json();
+    } catch { return null; }
   };
 
   const fetchPriceHistory = async (): Promise<PriceHistoryPoint[]> => {
@@ -111,12 +127,13 @@ export default function Dashboard() {
         await initDb();
       }
 
-      const [fetchedPrice, fetchedLots, fetchedCash, fetchedCycles, history] = await Promise.all([
+      const [fetchedPrice, fetchedLots, fetchedCash, fetchedCycles, history, fetchedMarket] = await Promise.all([
         fetchPrice(),
         fetchLots(),
         fetchCash(),
         fetchCycles(),
         fetchPriceHistory(),
+        fetchMarket(),
       ]);
 
       if (fetchedPrice) setPrice(fetchedPrice);
@@ -124,6 +141,7 @@ export default function Dashboard() {
       setCashState(fetchedCash);
       setCycles(fetchedCycles);
       setPriceHistory(history);
+      if (fetchedMarket) setMarket(fetchedMarket);
       setLastUpdated(new Date());
     } finally {
       setLoading(false);
@@ -207,6 +225,39 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
+        {/* Global market strip */}
+        {market && (market.usdSpot || market.usdThb) && (
+          <div className="border-t border-slate-800/60 bg-slate-950/80">
+            <div className="max-w-5xl mx-auto px-4 py-1.5 flex items-center gap-4 flex-wrap">
+              {market.usdSpot && (
+                <span className="text-xs text-slate-400 font-mono">
+                  <span className="text-slate-600 mr-1">XAU/USD</span>
+                  <span className="text-slate-200">${market.usdSpot.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                  <span className="text-slate-600 ml-1">/oz</span>
+                </span>
+              )}
+              {market.usdThb && (
+                <span className="text-xs text-slate-400 font-mono">
+                  <span className="text-slate-600 mr-1">USD/THB</span>
+                  <span className="text-slate-200">{market.usdThb.toFixed(2)}</span>
+                </span>
+              )}
+              {market.impliedThbPerBaht && currentSellPrice > 0 && (
+                <span className="text-xs font-mono">
+                  <span className="text-slate-600 mr-1">implied</span>
+                  <span className={Math.abs(market.impliedThbPerBaht - currentSellPrice) / currentSellPrice < 0.02 ? 'text-slate-400' : 'text-yellow-500'}>
+                    ฿{market.impliedThbPerBaht.toLocaleString()}
+                  </span>
+                  {currentSellPrice > 0 && (
+                    <span className="text-slate-600 ml-1">
+                      ({market.impliedThbPerBaht > currentSellPrice ? '+' : ''}{Math.round((market.impliedThbPerBaht - currentSellPrice) / currentSellPrice * 100 * 10) / 10}%)
+                    </span>
+                  )}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-6 space-y-6">
