@@ -10,6 +10,7 @@ import ScenarioGrid from '@/components/ScenarioGrid';
 import LotTable from '@/components/LotTable';
 import TradingViewChart from '@/components/TradingViewChart';
 import CycleHistory from '@/components/CycleHistory';
+import MarketContext from '@/components/MarketContext';
 
 import { GoldPrice } from '@/lib/price-fetcher';
 import { Lot, CashState, computePortfolioMetrics, generateActionPlan } from '@/lib/trading-rules';
@@ -18,6 +19,10 @@ interface MarketData {
   usdSpot: number | null;
   usdThb: number | null;
   impliedThbPerBaht: number | null;
+  dxyChange: number | null;
+  goldChange7d: number | null;
+  gold52wHigh: number | null;
+  gold52wLow: number | null;
   source: string;
   fetchedAt: string;
 }
@@ -286,7 +291,10 @@ export default function Dashboard() {
         {/* 1. Action Plan — hero decision card */}
         <ActionPlan plan={actionPlan} loading={loading} />
 
-        {/* 2. Portfolio Metrics — how you're doing overall */}
+        {/* 2. Market Conditions — global context behind the signal */}
+        <MarketContext market={market} loading={loading} />
+
+        {/* 3. Portfolio Metrics — how you're doing overall */}
         <PortfolioMetrics metrics={metrics} loading={loading} />
 
         {/* 3. Band Position — why the signal is what it is */}
