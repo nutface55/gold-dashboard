@@ -13,29 +13,36 @@ interface MarketData {
 interface Signal {
   label: string;
   text: string;
+  detail: string;   // technical number shown in muted small text
   tone: 'green' | 'yellow' | 'red';
 }
 
 function getDxySignal(change: number | null): Signal | null {
   if (change === null) return null;
-  if (change <= -0.3) return { label: 'Dollar trend', text: 'Dollar is weakening — good for gold', tone: 'green' };
-  if (change >= 0.3)  return { label: 'Dollar trend', text: 'Dollar is strengthening — bad for gold', tone: 'red' };
-  return { label: 'Dollar trend', text: 'Dollar is stable — not pushing gold either way', tone: 'yellow' };
+  const sign = change >= 0 ? '+' : '';
+  const detail = `DXY (US Dollar Index) ${sign}${change.toFixed(2)}% today`;
+  if (change <= -0.3) return { label: 'Dollar trend', text: 'Dollar is weakening — good for gold', detail, tone: 'green' };
+  if (change >= 0.3)  return { label: 'Dollar trend', text: 'Dollar is strengthening — bad for gold', detail, tone: 'red' };
+  return { label: 'Dollar trend', text: 'Dollar is stable — not pushing gold either way', detail, tone: 'yellow' };
 }
 
 function getMomentumSignal(change7d: number | null): Signal | null {
   if (change7d === null) return null;
-  if (change7d >= 2)  return { label: 'This week', text: 'Gold has been rising this week', tone: 'green' };
-  if (change7d <= -2) return { label: 'This week', text: 'Gold has been falling this week', tone: 'red' };
-  return { label: 'This week', text: 'Gold has been mostly flat this week', tone: 'yellow' };
+  const sign = change7d >= 0 ? '+' : '';
+  const detail = `XAU/USD 5-day change: ${sign}${change7d.toFixed(1)}%`;
+  if (change7d >= 2)  return { label: 'This week', text: 'Gold has been rising this week', detail, tone: 'green' };
+  if (change7d <= -2) return { label: 'This week', text: 'Gold has been falling this week', detail, tone: 'red' };
+  return { label: 'This week', text: 'Gold has been mostly flat this week', detail, tone: 'yellow' };
 }
 
 function get52wSignal(spot: number | null, high: number | null, low: number | null): Signal | null {
   if (!spot || !high || !low || high === low) return null;
   const position = (spot - low) / (high - low);
-  if (position >= 0.85) return { label: 'Yearly range', text: 'Near its highest price in a year — be cautious buying more', tone: 'red' };
-  if (position <= 0.25) return { label: 'Yearly range', text: 'Near its lowest price in a year — a good time to buy', tone: 'green' };
-  return { label: 'Yearly range', text: 'Sitting in the middle of its yearly range', tone: 'yellow' };
+  const pct = Math.round(position * 100);
+  const detail = `XAU/USD at ${pct}% of 52-week range  ($${Math.round(low).toLocaleString()} – $${Math.round(high).toLocaleString()})`;
+  if (position >= 0.85) return { label: 'Yearly range', text: 'Near its highest price in a year — be cautious buying more', detail, tone: 'red' };
+  if (position <= 0.25) return { label: 'Yearly range', text: 'Near its lowest price in a year — a good time to buy', detail, tone: 'green' };
+  return { label: 'Yearly range', text: 'Sitting in the middle of its yearly range', detail, tone: 'yellow' };
 }
 
 function getOverall(signals: Signal[]): { text: string; tone: 'green' | 'yellow' | 'red' } {
@@ -105,10 +112,13 @@ export default function MarketContext({ market, loading }: Props) {
       <div className="space-y-2 mb-4">
         {signals.map((signal) => (
           <div key={signal.label} className="flex items-start gap-3 bg-slate-800/50 rounded-lg px-3 py-2.5">
-            <div className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${dot[signal.tone]}`} />
+            <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${dot[signal.tone]}`} />
             <div>
-              <span className="text-xs text-slate-500 uppercase tracking-wide mr-2">{signal.label}</span>
-              <span className={`text-sm ${text[signal.tone]}`}>{signal.text}</span>
+              <div>
+                <span className="text-xs text-slate-500 uppercase tracking-wide mr-2">{signal.label}</span>
+                <span className={`text-sm ${text[signal.tone]}`}>{signal.text}</span>
+              </div>
+              <div className="text-xs text-slate-600 font-mono mt-0.5">{signal.detail}</div>
             </div>
           </div>
         ))}
