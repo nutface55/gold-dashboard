@@ -40,12 +40,21 @@ export default function BandPosition({ bandPosition, loading }: Props) {
     strong_buy: 'Near lower band — strong buy',
   };
 
+  const plainEnglish: Record<string, string> = {
+    strong_sell: `Gold has pushed above its normal range — prices this high don't usually last long.`,
+    mild_sell: `Gold is above its 20-day average. Not urgent, but worth watching for a sell opportunity.`,
+    hold: `Gold is sitting right around its average price — no strong reason to buy or sell right now.`,
+    hold_buy: `Gold has dipped below its average. Starting to look like a reasonable place to add more.`,
+    strong_buy: `Gold is near the bottom of its normal range — historically a good time to buy.`,
+  };
+
   return (
     <div className="bg-slate-900 border border-slate-700 rounded-lg p-5">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-2">
         <h3 className="text-sm font-semibold text-slate-200 border-l-2 border-yellow-500 pl-2">Band Position</h3>
         <span className={`text-xs font-semibold ${zoneColors[zone]}`}>{zoneLabels[zone]}</span>
       </div>
+      <p className="text-sm text-slate-400 mb-4">{plainEnglish[zone]}</p>
 
       {/* Band bar */}
       <div className="relative mb-6">

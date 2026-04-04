@@ -288,19 +288,20 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* 1. Action Plan — hero decision card */}
+        {/* ── DECISION ─────────────────────────────────────── */}
         <ActionPlan plan={actionPlan} loading={loading} />
 
-        {/* 2. Market Conditions — global context behind the signal */}
-        <MarketContext market={market} loading={loading} />
-
-        {/* 3. Portfolio Metrics — how you're doing overall */}
+        {/* ── PORTFOLIO ────────────────────────────────────── */}
+        <SectionDivider label="Portfolio" />
         <PortfolioMetrics metrics={metrics} loading={loading} />
 
-        {/* 3. Band Position — why the signal is what it is */}
+        {/* ── MARKET CONTEXT ───────────────────────────────── */}
+        <SectionDivider label="Market Context" />
+        <MarketContext market={market} loading={loading} />
         <BandPosition bandPosition={bandPosition} loading={loading} />
 
-        {/* 4. Cash Tracker — cash to deploy */}
+        {/* ── OPERATIONS ───────────────────────────────────── */}
+        <SectionDivider label="Operations" />
         <CashTracker
           cashState={cashState}
           currentPrice={usePrice || avgBuyPrice}
@@ -309,15 +310,11 @@ export default function Dashboard() {
           avgBuyPrice={avgBuyPrice}
           onUpdate={() => loadAll(true)}
         />
-
-        {/* 5. Lot Inventory — what you own */}
         <LotTable
           lots={lots}
           currentSellPrice={usePrice || avgBuyPrice}
           onUpdate={() => loadAll(true)}
         />
-
-        {/* 6. Scenario Comparison — sell math detail */}
         {bands && usePrice > 0 && (
           <ScenarioGrid
             currentPrice={usePrice}
@@ -327,10 +324,9 @@ export default function Dashboard() {
           />
         )}
 
-        {/* 7. Cycle History — track record */}
+        {/* ── HISTORY ──────────────────────────────────────── */}
+        <SectionDivider label="History" />
         <CycleHistory cycles={cycles} onUpdate={() => loadAll(true)} />
-
-        {/* 8. Live Chart — reference, at the bottom */}
         <TradingViewChart />
 
         {lastUpdated && (
@@ -339,6 +335,16 @@ export default function Dashboard() {
           </p>
         )}
       </main>
+    </div>
+  );
+}
+
+function SectionDivider({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-3 pt-2">
+      <div className="flex-1 h-px bg-slate-800" />
+      <span className="text-xs text-slate-600 uppercase tracking-widest font-medium">{label}</span>
+      <div className="flex-1 h-px bg-slate-800" />
     </div>
   );
 }

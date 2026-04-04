@@ -86,7 +86,7 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, a
         ฿{(cashState?.amount || 0).toLocaleString()}
       </div>
       {(!cashState || cashState.amount === 0) && (
-        <p className="text-xs text-slate-600 mt-1 mb-4">No cash from sales — fully deployed in gold.</p>
+        <p className="text-xs text-slate-500 mt-1 mb-4">Fully deployed in gold — watching for the next sell opportunity.</p>
       )}
       {cashState && cashState.amount > 0 && <div className="mb-4" />}
 

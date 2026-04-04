@@ -41,12 +41,38 @@ export default function CycleHistory({ cycles, onUpdate }: Props) {
     );
   }
 
+  const totalGoldGained = cycles.reduce((sum, cycle) => {
+    const bought = cycle.buybacks.reduce((s, b) => s + b.buy_weight, 0);
+    return sum + (bought - cycle.sell_weight);
+  }, 0);
+  const closedCycles = cycles.filter(c => c.status === 'closed').length;
+  const openCycles = cycles.filter(c => c.status === 'open').length;
+
   let runningGold = 0;
 
   return (
     <div className="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden">
       <div className="px-5 py-4 border-b border-slate-700">
-        <h3 className="text-sm font-semibold text-slate-200 border-l-2 border-yellow-500 pl-2">Cycle History</h3>
+        <h3 className="text-sm font-semibold text-slate-200 border-l-2 border-yellow-500 pl-2 mb-3">Cycle History</h3>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-slate-800 rounded-lg px-3 py-2 text-center">
+            <div className="text-xs text-slate-500 mb-0.5">Total Cycles</div>
+            <div className="text-base font-bold font-mono text-white">{cycles.length}</div>
+          </div>
+          <div className="bg-slate-800 rounded-lg px-3 py-2 text-center">
+            <div className="text-xs text-slate-500 mb-0.5">Completed</div>
+            <div className="text-base font-bold font-mono text-green-400">{closedCycles}</div>
+          </div>
+          <div className="bg-slate-800 rounded-lg px-3 py-2 text-center">
+            <div className="text-xs text-slate-500 mb-0.5">Gold Gained</div>
+            <div className={`text-base font-bold font-mono ${totalGoldGained > 0 ? 'text-green-400' : 'text-slate-400'}`}>
+              {totalGoldGained > 0 ? '+' : ''}{totalGoldGained}B
+            </div>
+          </div>
+        </div>
+        {openCycles > 0 && (
+          <p className="text-xs text-yellow-500 mt-2">{openCycles} open cycle{openCycles > 1 ? 's' : ''} — waiting to buy back</p>
+        )}
       </div>
       <div className="divide-y divide-slate-800">
         {cycles.map((cycle, i) => {
