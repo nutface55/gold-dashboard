@@ -327,11 +327,6 @@ export default function Dashboard() {
         {/* ── TAB 1: PORTFOLIO ─────────────────────────────── */}
         {activeTab === 'portfolio' && (
           <div className="space-y-6">
-            <GoalTracker
-              bandPosition={bandPosition}
-              metrics={metrics}
-              loading={loading}
-            />
             <ActionPlan
               plan={actionPlan}
               loading={loading}
@@ -356,6 +351,11 @@ export default function Dashboard() {
                 market={market}
               />
             )}
+            <GoalTracker
+              bandPosition={bandPosition}
+              metrics={metrics}
+              loading={loading}
+            />
             <SectionDivider label="Portfolio" />
             <PortfolioMetrics metrics={metrics} loading={loading} />
             <SectionDivider label="Operations" />
@@ -367,11 +367,6 @@ export default function Dashboard() {
               avgBuyPrice={avgBuyPrice}
               onUpdate={() => loadAll(true)}
             />
-            <LotTable
-              lots={lots}
-              currentSellPrice={usePrice || avgBuyPrice}
-              onUpdate={() => loadAll(true)}
-            />
             {bands && usePrice > 0 && (
               <ScenarioGrid
                 currentPrice={usePrice}
@@ -380,6 +375,11 @@ export default function Dashboard() {
                 cashInHand={cashState?.amount}
               />
             )}
+            <LotTable
+              lots={lots}
+              currentSellPrice={usePrice || avgBuyPrice}
+              onUpdate={() => loadAll(true)}
+            />
             <SectionDivider label="History" />
             <CycleHistory cycles={cycles} onUpdate={() => loadAll(true)} />
           </div>
