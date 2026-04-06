@@ -14,6 +14,7 @@ import MarketContext from '@/components/MarketContext';
 import FedWatch from '@/components/FedWatch';
 import TakeProfitSignal from '@/components/TakeProfitSignal';
 import GoalTracker from '@/components/GoalTracker';
+import SimulatorTab from '@/components/SimulatorTab';
 
 import { GoldPrice } from '@/lib/price-fetcher';
 import { Lot, CashState, computePortfolioMetrics, generateActionPlan } from '@/lib/trading-rules';
@@ -64,7 +65,7 @@ export default function Dashboard() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [initAttempted, setInitAttempted] = useState(false);
   const [market, setMarket] = useState<MarketData | null>(null);
-  const [activeTab, setActiveTab] = useState<'portfolio' | 'market'>('portfolio');
+  const [activeTab, setActiveTab] = useState<'portfolio' | 'market' | 'simulate'>('portfolio');
 
   const fetchPrice = async (): Promise<GoldPrice | null> => {
     try {
@@ -283,7 +284,7 @@ export default function Dashboard() {
         {/* Tab bar */}
         <div className="border-t border-slate-800">
           <div className="max-w-5xl mx-auto px-4 flex">
-            {(['portfolio', 'market'] as const).map(tab => (
+            {(['portfolio', 'market', 'simulate'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -293,7 +294,7 @@ export default function Dashboard() {
                     : 'border-transparent text-slate-500 hover:text-slate-300'
                 }`}
               >
-                {tab === 'portfolio' ? 'Portfolio' : 'Market'}
+                {tab === 'portfolio' ? 'Portfolio' : tab === 'market' ? 'Market' : 'Simulate'}
               </button>
             ))}
           </div>
@@ -399,6 +400,17 @@ export default function Dashboard() {
             <FedWatch fedRate={market?.fedRate ?? null} loading={loading} />
             <BandPosition bandPosition={bandPosition} loading={loading} />
           </div>
+        )}
+
+        {/* ── TAB 3: SIMULATE ──────────────────────────────── */}
+        {activeTab === 'simulate' && (
+          <SimulatorTab
+            lots={lots}
+            currentSellPrice={currentSellPrice}
+            currentBuyPrice={currentBuyPrice}
+            metrics={metrics}
+            bands={bands}
+          />
         )}
 
         {lastUpdated && (
