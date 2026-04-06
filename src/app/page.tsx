@@ -13,6 +13,7 @@ import CycleHistory from '@/components/CycleHistory';
 import MarketContext from '@/components/MarketContext';
 import FedWatch from '@/components/FedWatch';
 import TakeProfitSignal from '@/components/TakeProfitSignal';
+import GoalTracker from '@/components/GoalTracker';
 
 import { GoldPrice } from '@/lib/price-fetcher';
 import { Lot, CashState, computePortfolioMetrics, generateActionPlan } from '@/lib/trading-rules';
@@ -326,6 +327,11 @@ export default function Dashboard() {
         {/* ── TAB 1: PORTFOLIO ─────────────────────────────── */}
         {activeTab === 'portfolio' && (
           <div className="space-y-6">
+            <GoalTracker
+              bandPosition={bandPosition}
+              metrics={metrics}
+              loading={loading}
+            />
             <ActionPlan
               plan={actionPlan}
               loading={loading}

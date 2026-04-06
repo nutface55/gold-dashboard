@@ -80,6 +80,11 @@ export default function ActionPlan({ plan, loading, lastUpdated, priceUpdateTime
 
   return (
     <div className={`border-2 rounded-lg p-6 ${cfg.bg}`}>
+      {/* Header label */}
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs text-slate-500 uppercase tracking-wide font-medium">Trading Pool</span>
+        <span className="text-xs text-slate-600 italic">Existing lots → cycle for profit</span>
+      </div>
       <div className="flex items-center gap-3 mb-4">
         <Icon className={`w-7 h-7 ${cfg.iconColor}`} />
         <span className={`text-xs font-bold px-3 py-1 rounded-full tracking-wide ${cfg.badge}`}>{cfg.label}</span>
