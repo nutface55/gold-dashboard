@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Gold Dashboard — Thai Gold Portfolio",
+  title: "Ally's Gold Rush",
   description: "Personal gold trading dashboard for 96.5% Thai gold portfolio management",
 };
 

@@ -211,7 +211,7 @@ export default function Dashboard() {
         <div className="h-0.5 bg-gradient-to-r from-yellow-500/80 via-yellow-400/50 to-transparent" />
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-bold text-yellow-400 tracking-tight">Gold Dashboard</h1>
+            <h1 className="text-lg font-bold text-yellow-400 tracking-tight">Ally's Gold Rush</h1>
             <p className="text-xs text-slate-500">96.5% Thai Gold · {totalWeight}B → 150B</p>
           </div>
           <div className="flex items-center gap-3">
