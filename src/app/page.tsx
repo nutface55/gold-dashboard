@@ -357,9 +357,9 @@ export default function Dashboard() {
         {/* ── TAB 2: MARKET ────────────────────────────────── */}
         {activeTab === 'market' && (
           <div className="space-y-6">
+            <TradingViewChart />
             <MarketContext market={market} loading={loading} />
             <BandPosition bandPosition={bandPosition} loading={loading} />
-            <TradingViewChart />
           </div>
         )}
 
