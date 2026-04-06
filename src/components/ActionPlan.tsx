@@ -6,6 +6,8 @@ import { AlertTriangle, TrendingDown, TrendingUp, Minus, DollarSign, Clock, Arro
 interface Props {
   plan: ActionPlanType | null;
   loading?: boolean;
+  lastUpdated?: Date | null;
+  priceUpdateTime?: string | null;  // e.g. "09:38 (5th update today)"
 }
 
 const signalConfig = {
@@ -60,7 +62,7 @@ const signalConfig = {
   },
 };
 
-export default function ActionPlan({ plan, loading }: Props) {
+export default function ActionPlan({ plan, loading, lastUpdated, priceUpdateTime }: Props) {
   if (loading) {
     return (
       <div className="border border-slate-700 rounded-lg p-6 bg-slate-900 animate-pulse">
@@ -121,6 +123,33 @@ export default function ActionPlan({ plan, loading }: Props) {
       {plan.daysSinceSale !== undefined && plan.daysSinceSale > 0 && (
         <div className={`mt-3 text-xs ${plan.daysSinceSale >= 25 ? 'text-yellow-400' : 'text-slate-400'}`}>
           Day {plan.daysSinceSale} of 30-day redeployment window
+        </div>
+      )}
+
+      {/* Timestamp footer */}
+      {(lastUpdated || priceUpdateTime) && (
+        <div className="mt-4 pt-3 border-t border-white/10 flex items-center gap-2 flex-wrap">
+          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
+          <span className="text-xs text-slate-500">
+            {lastUpdated && (
+              <>
+                Recommendation calculated{' '}
+                <span className="text-slate-400 font-medium">
+                  {lastUpdated.toLocaleTimeString('th-TH', {
+                    timeZone: 'Asia/Bangkok',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false,
+                  })} ICT
+                </span>
+              </>
+            )}
+            {priceUpdateTime && (
+              <span className="text-slate-600">
+                {lastUpdated ? ' · ' : ''}Price source: <span className="text-slate-500">{priceUpdateTime}</span>
+              </span>
+            )}
+          </span>
         </div>
       )}
     </div>

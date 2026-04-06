@@ -289,7 +289,23 @@ export default function Dashboard() {
         )}
 
         {/* ── DECISION ─────────────────────────────────────── */}
-        <ActionPlan plan={actionPlan} loading={loading} />
+        <ActionPlan
+          plan={actionPlan}
+          loading={loading}
+          lastUpdated={lastUpdated}
+          priceUpdateTime={(() => {
+            const raw = price?.raw as { update_time?: string } | undefined;
+            const t = raw?.update_time;
+            if (!t) return null;
+            // "เวลา 09:38 น. (ครั้งที่ 5)" → "09:38 (5th update today)"
+            const timeMatch = t.match(/(\d{2}:\d{2})/);
+            const countMatch = t.match(/ครั้งที่\s*(\d+)/);
+            if (!timeMatch) return null;
+            const count = countMatch ? parseInt(countMatch[1]) : null;
+            const ordinal = count ? `${count}${['st','nd','rd'][count-1]||'th'} update today` : null;
+            return `${timeMatch[1]}${ordinal ? ` (${ordinal})` : ''}`;
+          })()}
+        />
 
         {/* ── PORTFOLIO ────────────────────────────────────── */}
         <SectionDivider label="Portfolio" />
