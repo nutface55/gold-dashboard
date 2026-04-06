@@ -157,7 +157,7 @@ export default function GoalTracker({ bandPosition, metrics, loading }: Props) {
               style={{ width: `${progressPct}%` }}
             />
           </div>
-          <span className="text-xs font-mono text-slate-400 w-16 text-right">
+          <span className="text-xs font-mono text-slate-400 whitespace-nowrap text-right">
             {metrics.totalWeight}B / 150B
           </span>
         </div>

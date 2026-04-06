@@ -97,7 +97,11 @@ export default function ActionPlan({ plan, loading, lastUpdated, priceUpdateTime
       </div>
 
       <h2 className="text-2xl font-bold text-white mb-3 leading-snug">{plan.headline}</h2>
-      <p className="text-sm text-slate-300 mb-4 whitespace-pre-line leading-relaxed">{plan.detail}</p>
+      <div className="text-sm text-slate-300 mb-4 space-y-2 leading-relaxed">
+        {plan.detail.split('\n\n').map((block, i) => (
+          <p key={i}>{block}</p>
+        ))}
+      </div>
 
       {/* Sell → Rebuy preview — shown on all sell signals */}
       {plan.rebuySummary && (
