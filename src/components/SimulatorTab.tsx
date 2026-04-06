@@ -39,15 +39,16 @@ function simulateSell(
   const newTotalWeight = metrics.totalWeight - weight;
 
   // Rebuy scenarios
-  const rebuyAtSma = bands ? Math.floor(cash / bands.sma / 5) * 5 : null;
-  const rebuyAtLower = bands ? Math.floor(cash / bands.lowerBand / 5) * 5 : null;
+  // Only show rebuy scenarios where the rebuy price is cheaper than the sell price
+  const rebuyAtSma = bands && bands.sma < sellPrice ? Math.floor(cash / bands.sma / 5) * 5 : null;
+  const rebuyAtLower = bands && bands.lowerBand < sellPrice ? Math.floor(cash / bands.lowerBand / 5) * 5 : null;
   const netAtSma = rebuyAtSma !== null ? rebuyAtSma - weight : null;
   const netAtLower = rebuyAtLower !== null ? rebuyAtLower - weight : null;
 
-  // Find which lots would be sold (most profitable tradable, highest profit first)
+  // Find which lots would be sold (most profitable tradable first)
   const tradable = lots
     .filter(l => !isLockedLot(l, sellPrice))
-    .sort((a, b) => a.buy_price - b.buy_price); // lowest cost = most profit
+    .sort((a, b) => a.buy_price - b.buy_price);
 
   let remaining = weight;
   const soldLots: { weight: number; buy_price: number }[] = [];
@@ -63,7 +64,11 @@ function simulateSell(
     : 0;
   const profitLocked = soldLots.length > 0 ? (sellPrice - avgSoldCost) * weight : 0;
 
-  return { cash, newTotalWeight, rebuyAtSma, rebuyAtLower, netAtSma, netAtLower, avgSoldCost, profitLocked };
+  // Tradable remaining after sell
+  const tradableWeight = lots.filter(l => !isLockedLot(l, sellPrice)).reduce((s, l) => s + l.weight, 0);
+  const newTradableWeight = tradableWeight - weight;
+
+  return { cash, newTotalWeight, newTradableWeight, tradableWeight, rebuyAtSma, rebuyAtLower, netAtSma, netAtLower, avgSoldCost, profitLocked };
 }
 
 interface BuyCardProps {
@@ -167,21 +172,27 @@ function SellCard({ weight, sellPrice, lots, metrics, bands }: SellCardProps) {
           mono
         />
         <Row
-          label="Remaining gold"
-          value={`${sim.newTotalWeight}B`}
-          sub={`was ${metrics.totalWeight}B → -${weight}B`}
+          label="Tradable gold remaining"
+          value={`${sim.newTradableWeight}B`}
+          sub={`was ${sim.tradableWeight}B tradable → -${weight}B`}
           subColor="text-slate-500"
         />
 
-        {/* Rebuy scenarios */}
-        {bands && (
+        {/* Rebuy scenarios — only shown when a cheaper entry exists */}
+        {bands && (sim.rebuyAtSma !== null || sim.rebuyAtLower !== null) && (
           <div className="border-t border-slate-800 pt-3 mt-1 space-y-2">
-            <p className="text-xs text-slate-600 uppercase tracking-wide mb-2">If you rebuy later</p>
+            <p className="text-xs text-slate-600 uppercase tracking-wide mb-2">If price drops and you rebuy</p>
             {sim.rebuyAtSma !== null && (
               <Row
                 label={`At SMA ฿${bands.sma.toLocaleString()}`}
                 value={`${sim.rebuyAtSma}B back`}
-                sub={sim.netAtSma !== null ? `${sim.netAtSma >= 0 ? '+' : ''}${sim.netAtSma}B net` : ''}
+                sub={sim.netAtSma !== null
+                  ? sim.netAtSma > 0
+                    ? `+${sim.netAtSma}B more gold than you sold`
+                    : sim.netAtSma === 0
+                    ? 'same amount back'
+                    : `${sim.netAtSma}B less than you sold`
+                  : ''}
                 subColor={sim.netAtSma !== null && sim.netAtSma >= 0 ? 'text-green-400' : 'text-red-400'}
                 mono
               />
@@ -190,12 +201,23 @@ function SellCard({ weight, sellPrice, lots, metrics, bands }: SellCardProps) {
               <Row
                 label={`At lower band ฿${bands.lowerBand.toLocaleString()}`}
                 value={`${sim.rebuyAtLower}B back`}
-                sub={sim.netAtLower !== null ? `${sim.netAtLower >= 0 ? '+' : ''}${sim.netAtLower}B net` : ''}
+                sub={sim.netAtLower !== null
+                  ? sim.netAtLower > 0
+                    ? `+${sim.netAtLower}B more gold than you sold`
+                    : sim.netAtLower === 0
+                    ? 'same amount back'
+                    : `${sim.netAtLower}B less than you sold`
+                  : ''}
                 subColor={sim.netAtLower !== null && sim.netAtLower >= 0 ? 'text-green-400' : 'text-red-400'}
                 mono
               />
             )}
           </div>
+        )}
+        {bands && sim.rebuyAtSma === null && sim.rebuyAtLower === null && (
+          <p className="text-xs text-slate-600 border-t border-slate-800 pt-3 mt-1">
+            Current price is already at or below SMA — no cheaper rebuy entry available right now.
+          </p>
         )}
       </div>
     </div>
