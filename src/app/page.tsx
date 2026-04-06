@@ -11,6 +11,7 @@ import LotTable from '@/components/LotTable';
 import TradingViewChart from '@/components/TradingViewChart';
 import CycleHistory from '@/components/CycleHistory';
 import MarketContext from '@/components/MarketContext';
+import FedWatch from '@/components/FedWatch';
 
 import { GoldPrice } from '@/lib/price-fetcher';
 import { Lot, CashState, computePortfolioMetrics, generateActionPlan } from '@/lib/trading-rules';
@@ -23,6 +24,10 @@ interface MarketData {
   goldChange7d: number | null;
   gold52wHigh: number | null;
   gold52wLow: number | null;
+  tnxYield: number | null;
+  tnxChange: number | null;
+  vix: number | null;
+  fedRate: number | null;
   source: string;
   fetchedAt: string;
 }
@@ -359,6 +364,7 @@ export default function Dashboard() {
           <div className="space-y-6">
             <TradingViewChart />
             <MarketContext market={market} loading={loading} />
+            <FedWatch fedRate={market?.fedRate ?? null} loading={loading} />
             <BandPosition bandPosition={bandPosition} loading={loading} />
           </div>
         )}

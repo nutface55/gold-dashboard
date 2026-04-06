@@ -8,6 +8,10 @@ interface MarketData {
   goldChange7d: number | null;
   gold52wHigh: number | null;
   gold52wLow: number | null;
+  tnxYield: number | null;
+  tnxChange: number | null;
+  vix: number | null;
+  fedRate: number | null;
 }
 
 interface Signal {
@@ -43,6 +47,23 @@ function get52wSignal(spot: number | null, high: number | null, low: number | nu
   if (position >= 0.85) return { label: 'Yearly range', text: 'Near its highest price in a year — be cautious buying more', detail, tone: 'red' };
   if (position <= 0.25) return { label: 'Yearly range', text: 'Near its lowest price in a year — a good time to buy', detail, tone: 'green' };
   return { label: 'Yearly range', text: 'Sitting in the middle of its yearly range', detail, tone: 'yellow' };
+}
+
+function getTnxSignal(change: number | null, yield_: number | null): Signal | null {
+  if (change === null || yield_ === null) return null;
+  const detail = `US 10-year Treasury yield: ${yield_.toFixed(2)}% (${change >= 0 ? '+' : ''}${change.toFixed(2)}% today)`;
+  if (change <= -0.03) return { label: 'Bond yields', text: 'Bond yields are falling — good for gold', detail, tone: 'green' };
+  if (change >= 0.03)  return { label: 'Bond yields', text: 'Bond yields are rising — puts pressure on gold', detail, tone: 'red' };
+  return { label: 'Bond yields', text: 'Bond yields are stable — no strong push on gold', detail, tone: 'yellow' };
+}
+
+function getVixSignal(vix: number | null): Signal | null {
+  if (vix === null) return null;
+  const detail = `VIX (fear index): ${vix.toFixed(1)} — ${vix > 30 ? 'high fear' : vix > 20 ? 'elevated' : vix > 15 ? 'normal' : 'calm'}`;
+  if (vix > 30) return { label: 'Market fear', text: 'Markets are fearful — gold benefits as a safe haven', detail, tone: 'green' };
+  if (vix > 20) return { label: 'Market fear', text: 'Markets are a little nervous — mild support for gold', detail, tone: 'green' };
+  if (vix < 15) return { label: 'Market fear', text: 'Markets are calm — less safe-haven demand for gold', detail, tone: 'yellow' };
+  return { label: 'Market fear', text: 'Market volatility is normal — neutral for gold', detail, tone: 'yellow' };
 }
 
 function getOverall(signals: Signal[]): { text: string; tone: 'green' | 'yellow' | 'red' } {
@@ -95,6 +116,8 @@ export default function MarketContext({ market, loading }: Props) {
 
   const signals = [
     getDxySignal(market.dxyChange),
+    getTnxSignal(market.tnxChange ?? null, market.tnxYield ?? null),
+    getVixSignal(market.vix ?? null),
     getMomentumSignal(market.goldChange7d),
     get52wSignal(market.usdSpot, market.gold52wHigh, market.gold52wLow),
   ].filter((s): s is Signal => s !== null);
