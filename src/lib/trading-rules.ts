@@ -223,8 +223,8 @@ export function generateActionPlan(
   const meaningfullyBelowAvg = bandPosition.currentPrice < avgBuyPrice * 0.99;
   if (meaningfullyBelowAvg || distToLower <= 2) {
     // Use blended avgBuyPrice + totalWeight for accurate portfolio avg after injection
-    const impact10 = calculateInjectionImpact(portfolioMetrics.totalWeight, portfolioMetrics.avgBuyPrice, 10, bandPosition.currentPrice);
-    const impact5 = calculateInjectionImpact(portfolioMetrics.totalWeight, portfolioMetrics.avgBuyPrice, 5, bandPosition.currentPrice);
+    const impact10 = calculateInjectionImpact(portfolioMetrics.tradableWeight, portfolioMetrics.tradableAvgBuyPrice, 10, bandPosition.currentPrice);
+    const impact5 = calculateInjectionImpact(portfolioMetrics.tradableWeight, portfolioMetrics.tradableAvgBuyPrice, 5, bandPosition.currentPrice);
     return {
       signal: 'strong_buy',
       headline: bandPosition.currentPrice < avgBuyPrice
@@ -240,7 +240,7 @@ export function generateActionPlan(
 
   // Mild buy: price below SMA by ≥ 3%
   if (percentAboveSma <= -3) {
-    const impact5 = calculateInjectionImpact(portfolioMetrics.totalWeight, portfolioMetrics.avgBuyPrice, 5, bandPosition.currentPrice);
+    const impact5 = calculateInjectionImpact(portfolioMetrics.tradableWeight, portfolioMetrics.tradableAvgBuyPrice, 5, bandPosition.currentPrice);
     return {
       signal: 'mild_buy',
       headline: 'Good entry point — gold is below its recent average',
@@ -251,7 +251,7 @@ export function generateActionPlan(
 
   // Mild buy: price below SMA by 1-3% — decent entry
   if (percentAboveSma <= -1) {
-    const impact5 = calculateInjectionImpact(portfolioMetrics.totalWeight, portfolioMetrics.avgBuyPrice, 5, bandPosition.currentPrice);
+    const impact5 = calculateInjectionImpact(portfolioMetrics.tradableWeight, portfolioMetrics.tradableAvgBuyPrice, 5, bandPosition.currentPrice);
     return {
       signal: 'mild_buy',
       headline: 'Decent entry — gold is slightly below average',
