@@ -12,6 +12,7 @@ import TradingViewChart from '@/components/TradingViewChart';
 import CycleHistory from '@/components/CycleHistory';
 import MarketContext from '@/components/MarketContext';
 import FedWatch from '@/components/FedWatch';
+import TakeProfitSignal from '@/components/TakeProfitSignal';
 
 import { GoldPrice } from '@/lib/price-fetcher';
 import { Lot, CashState, computePortfolioMetrics, generateActionPlan } from '@/lib/trading-rules';
@@ -341,6 +342,14 @@ export default function Dashboard() {
                 return `${timeMatch[1]}${ordinal ? ` (${ordinal})` : ''}`;
               })()}
             />
+            {usePrice > 0 && (
+              <TakeProfitSignal
+                lots={lots}
+                currentSellPrice={usePrice}
+                bandPosition={bandPosition}
+                market={market}
+              />
+            )}
             <SectionDivider label="Portfolio" />
             <PortfolioMetrics metrics={metrics} loading={loading} />
             <SectionDivider label="Operations" />
