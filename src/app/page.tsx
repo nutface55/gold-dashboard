@@ -217,9 +217,15 @@ export default function Dashboard() {
           <div className="flex items-center gap-3">
             {price && price.barSell > 0 && (
               <div className="text-right">
-                <div className="text-base font-bold font-mono text-yellow-300">
-                  ฿{currentSellPrice.toLocaleString()}
-                  <span className="text-xs text-slate-500 ml-1 font-normal">sell</span>
+                <div className="flex items-center justify-end gap-1.5">
+                  {isMarketOpen()
+                    ? <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
+                    : <span className="w-2 h-2 rounded-full bg-slate-600 flex-shrink-0" />
+                  }
+                  <span className="text-base font-bold font-mono text-yellow-300">
+                    ฿{currentSellPrice.toLocaleString()}
+                  </span>
+                  <span className="text-xs text-slate-500 font-normal">sell</span>
                 </div>
                 <div className="text-xs text-slate-500">
                   {price.source} ·{' '}
