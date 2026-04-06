@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { sell_date, sell_weight, sell_price } = body;
 
-    const cash_generated = sell_weight * sell_price;
+    const cash_generated = Math.round(sell_weight * sell_price);
 
     const cycle = await queryOne(
       `INSERT INTO cycles (sell_date, sell_weight, sell_price, cash_generated, status)
