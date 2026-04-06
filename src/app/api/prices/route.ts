@@ -38,8 +38,8 @@ export async function POST() {
     }>(
       `SELECT
          MAX(timestamp) AS timestamp,
-         ROUND(AVG(gold_bar_sell)) AS gold_bar_sell,
-         ROUND(AVG(gold_bar_buy))  AS gold_bar_buy
+         ROUND(AVG(gold_bar_sell))::integer AS gold_bar_sell,
+         ROUND(AVG(gold_bar_buy))::integer  AS gold_bar_buy
        FROM price_history
        WHERE gold_bar_sell > 0
        GROUP BY DATE(timestamp AT TIME ZONE 'Asia/Bangkok')
