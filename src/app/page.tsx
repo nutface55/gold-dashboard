@@ -178,7 +178,9 @@ export default function Dashboard() {
   // Bollinger Bands
   let bands: BandData | null = null;
   let bandPosition: BandPositionType | null = null;
-  const usePrice = currentSellPrice || currentBuyPrice;
+  const lastKnownPrice = priceHistory.length > 0 ? priceHistory[priceHistory.length - 1].price : 0;
+  const usePrice = currentSellPrice || currentBuyPrice || lastKnownPrice;
+  const usingFallbackPrice = usePrice > 0 && currentSellPrice === 0 && currentBuyPrice === 0;
 
   if (usePrice > 0) {
     const histPrices = priceHistory.length >= 20
@@ -307,6 +309,15 @@ export default function Dashboard() {
             <div>
               <p className="text-sm font-semibold text-red-300">Live price unavailable</p>
               <p className="text-xs text-red-600 mt-1">All price sources failed. Market may be closed. Refresh to try again.</p>
+            </div>
+          </div>
+        )}
+        {!loading && usingFallbackPrice && (
+          <div className="flex items-start gap-3 bg-slate-800 border border-slate-600 rounded-lg p-4">
+            <AlertCircle className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-slate-300">Market closed — showing last recorded price</p>
+              <p className="text-xs text-slate-500 mt-1">Thai gold shops are likely closed. P&L shown using ฿{lastKnownPrice.toLocaleString()} (last recorded price).</p>
             </div>
           </div>
         )}
