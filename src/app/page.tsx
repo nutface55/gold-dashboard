@@ -181,7 +181,7 @@ export default function Dashboard() {
   const usePrice = currentSellPrice || currentBuyPrice;
 
   if (usePrice > 0) {
-    const histPrices = priceHistory.length >= 5
+    const histPrices = priceHistory.length >= 20
       ? priceHistory.map(p => p.price)
       : generateSyntheticHistory(usePrice, avgBuyPrice, 60);
 

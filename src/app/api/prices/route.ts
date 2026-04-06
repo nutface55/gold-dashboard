@@ -26,7 +26,9 @@ export async function GET() {
   }
 }
 
-// Get price history for Bollinger Band chart
+// Get price history for Bollinger Band calculation
+// Returns ONE price per calendar day (daily average in Bangkok time)
+// so that the 20-period SMA is a true 20-day SMA, not a 7-day one
 export async function POST() {
   try {
     const history = await query<{
@@ -34,10 +36,14 @@ export async function POST() {
       gold_bar_sell: number;
       gold_bar_buy: number;
     }>(
-      `SELECT timestamp, gold_bar_sell, gold_bar_buy
+      `SELECT
+         MAX(timestamp) AS timestamp,
+         ROUND(AVG(gold_bar_sell)) AS gold_bar_sell,
+         ROUND(AVG(gold_bar_buy))  AS gold_bar_buy
        FROM price_history
        WHERE gold_bar_sell > 0
-       ORDER BY timestamp DESC
+       GROUP BY DATE(timestamp AT TIME ZONE 'Asia/Bangkok')
+       ORDER BY DATE(timestamp AT TIME ZONE 'Asia/Bangkok') DESC
        LIMIT 60`
     );
 
