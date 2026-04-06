@@ -103,6 +103,13 @@ export function isLockedLot(lot: Lot, currentSellPrice: number): boolean {
   return lot.is_forever || isForeverLot(lot, currentSellPrice);
 }
 
+// Format avg change label: positive drop = ↓ (good), negative drop = ↑ (avg went up)
+function avgChangeLabel(avgDrop: number): string {
+  if (avgDrop > 0) return `↓฿${avgDrop.toLocaleString()}`;
+  if (avgDrop < 0) return `↑฿${Math.abs(avgDrop).toLocaleString()}`;
+  return 'no change';
+}
+
 // Build the sell→rebuy preview shown at point of sell decision
 function buildRebuySummary(
   sellWeight: number,
@@ -226,7 +233,7 @@ export function generateActionPlan(
       detail: `${bandPosition.currentPrice < avgBuyPrice
         ? `Gold is ฿${(avgBuyPrice - bandPosition.currentPrice).toLocaleString()} below what you paid on average. Every baht you buy now brings your total cost down significantly.`
         : `Gold is right at the bottom of its normal range — historically this is where it bounces back up.`
-      } Stack as hard as you can here.\n\n📊 Technical: ${bandPosition.currentPrice < avgBuyPrice ? `Price (฿${bandPosition.currentPrice.toLocaleString()}) is below your avg buy price (฿${avgBuyPrice.toLocaleString()}) — strong accumulation signal.` : `Price is within 2% of the lower Bollinger Band (฿${bandPosition.lowerBand.toLocaleString()}) — statistically oversold.`}\n\n• Add 5B → new avg: ฿${impact5.newAvgBuyPrice.toLocaleString()} (↓฿${impact5.avgDrop.toLocaleString()}/baht)\n• Add 10B → new avg: ฿${impact10.newAvgBuyPrice.toLocaleString()} (↓฿${impact10.avgDrop.toLocaleString()}/baht)${rsiNote}`,
+      } Stack as hard as you can here.\n\n📊 Technical: ${bandPosition.currentPrice < avgBuyPrice ? `Price (฿${bandPosition.currentPrice.toLocaleString()}) is below your avg buy price (฿${avgBuyPrice.toLocaleString()}) — strong accumulation signal.` : `Price is within 2% of the lower Bollinger Band (฿${bandPosition.lowerBand.toLocaleString()}) — statistically oversold.`}\n\n• Add 5B → new avg: ฿${impact5.newAvgBuyPrice.toLocaleString()} (${avgChangeLabel(impact5.avgDrop)}/baht)\n• Add 10B → new avg: ฿${impact10.newAvgBuyPrice.toLocaleString()} (${avgChangeLabel(impact10.avgDrop)}/baht)${rsiNote}`,
       injectionImpact: impact5,
     };
   }
@@ -237,7 +244,7 @@ export function generateActionPlan(
     return {
       signal: 'mild_buy',
       headline: 'Good entry point — gold is below its recent average',
-      detail: `Gold is ${Math.abs(percentAboveSma).toFixed(1)}% below its 20-day average price. Not the lowest it can go, but a solid entry if you have spare cash. No rush — but better to buy here than when it's back above average.\n\n📊 Technical: Price is ${Math.abs(percentAboveSma).toFixed(1)}% below SMA (฿${bandPosition.sma.toLocaleString()}). Mild buy threshold: 3% below SMA.\n\n• Add 5B → new avg: ฿${impact5.newAvgBuyPrice.toLocaleString()} (↓฿${impact5.avgDrop.toLocaleString()}/baht)${rsiNote}`,
+      detail: `Gold is ${Math.abs(percentAboveSma).toFixed(1)}% below its 20-day average price. Not the lowest it can go, but a solid entry if you have spare cash. No rush — but better to buy here than when it's back above average.\n\n📊 Technical: Price is ${Math.abs(percentAboveSma).toFixed(1)}% below SMA (฿${bandPosition.sma.toLocaleString()}). Mild buy threshold: 3% below SMA.\n\n• Add 5B → new avg: ฿${impact5.newAvgBuyPrice.toLocaleString()} (${avgChangeLabel(impact5.avgDrop)}/baht)${rsiNote}`,
       injectionImpact: impact5,
     };
   }
@@ -248,7 +255,7 @@ export function generateActionPlan(
     return {
       signal: 'mild_buy',
       headline: 'Decent entry — gold is slightly below average',
-      detail: `Gold is slightly cheaper than its recent average. If you have extra cash sitting idle, this is a reasonable time to put it to work. Not urgent.\n\n📊 Technical: Price is ${Math.abs(percentAboveSma).toFixed(1)}% below SMA (฿${bandPosition.sma.toLocaleString()}).\n\n• Add 5B → new avg: ฿${impact5.newAvgBuyPrice.toLocaleString()} (↓฿${impact5.avgDrop.toLocaleString()}/baht)${rsiNote}`,
+      detail: `Gold is slightly cheaper than its recent average. If you have extra cash sitting idle, this is a reasonable time to put it to work. Not urgent.\n\n📊 Technical: Price is ${Math.abs(percentAboveSma).toFixed(1)}% below SMA (฿${bandPosition.sma.toLocaleString()}).\n\n• Add 5B → new avg: ฿${impact5.newAvgBuyPrice.toLocaleString()} (${avgChangeLabel(impact5.avgDrop)}/baht)${rsiNote}`,
       injectionImpact: impact5,
     };
   }
