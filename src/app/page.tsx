@@ -57,6 +57,7 @@ export default function Dashboard() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [initAttempted, setInitAttempted] = useState(false);
   const [market, setMarket] = useState<MarketData | null>(null);
+  const [activeTab, setActiveTab] = useState<'portfolio' | 'market'>('portfolio');
 
   const fetchPrice = async (): Promise<GoldPrice | null> => {
     try {
@@ -263,10 +264,29 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+        {/* Tab bar */}
+        <div className="border-t border-slate-800">
+          <div className="max-w-5xl mx-auto px-4 flex">
+            {(['portfolio', 'market'] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-5 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                  activeTab === tab
+                    ? 'border-yellow-400 text-yellow-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-300'
+                }`}
+              >
+                {tab === 'portfolio' ? 'Portfolio' : 'Market'}
+              </button>
+            ))}
+          </div>
+        </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-6 space-y-6">
-        {/* DB Error */}
+        {/* Alerts — always visible regardless of tab */}
         {dbError && (
           <div className="flex items-start gap-3 bg-yellow-950 border border-yellow-700 rounded-lg p-4">
             <AlertCircle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
@@ -276,8 +296,6 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-
-        {/* Price unavailable */}
         {!loading && usePrice === 0 && (
           <div className="flex items-start gap-3 bg-red-950 border border-red-700 rounded-lg p-4">
             <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
@@ -288,62 +306,62 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ── DECISION ─────────────────────────────────────── */}
-        <ActionPlan
-          plan={actionPlan}
-          loading={loading}
-          lastUpdated={lastUpdated}
-          priceUpdateTime={(() => {
-            const raw = price?.raw as { update_time?: string } | undefined;
-            const t = raw?.update_time;
-            if (!t) return null;
-            // "เวลา 09:38 น. (ครั้งที่ 5)" → "09:38 (5th update today)"
-            const timeMatch = t.match(/(\d{2}:\d{2})/);
-            const countMatch = t.match(/ครั้งที่\s*(\d+)/);
-            if (!timeMatch) return null;
-            const count = countMatch ? parseInt(countMatch[1]) : null;
-            const ordinal = count ? `${count}${['st','nd','rd'][count-1]||'th'} update today` : null;
-            return `${timeMatch[1]}${ordinal ? ` (${ordinal})` : ''}`;
-          })()}
-        />
-
-        {/* ── PORTFOLIO ────────────────────────────────────── */}
-        <SectionDivider label="Portfolio" />
-        <PortfolioMetrics metrics={metrics} loading={loading} />
-
-        {/* ── MARKET CONTEXT ───────────────────────────────── */}
-        <SectionDivider label="Market Context" />
-        <MarketContext market={market} loading={loading} />
-        <BandPosition bandPosition={bandPosition} loading={loading} />
-
-        {/* ── OPERATIONS ───────────────────────────────────── */}
-        <SectionDivider label="Operations" />
-        <CashTracker
-          cashState={cashState}
-          currentPrice={usePrice || avgBuyPrice}
-          sma={bands?.sma || avgBuyPrice}
-          lowerBand={bands?.lowerBand || Math.round(avgBuyPrice * 0.94)}
-          avgBuyPrice={avgBuyPrice}
-          onUpdate={() => loadAll(true)}
-        />
-        <LotTable
-          lots={lots}
-          currentSellPrice={usePrice || avgBuyPrice}
-          onUpdate={() => loadAll(true)}
-        />
-        {bands && usePrice > 0 && (
-          <ScenarioGrid
-            currentPrice={usePrice}
-            sma={bands.sma}
-            lowerBand={bands.lowerBand}
-            cashInHand={cashState?.amount}
-          />
+        {/* ── TAB 1: PORTFOLIO ─────────────────────────────── */}
+        {activeTab === 'portfolio' && (
+          <div className="space-y-6">
+            <ActionPlan
+              plan={actionPlan}
+              loading={loading}
+              lastUpdated={lastUpdated}
+              priceUpdateTime={(() => {
+                const raw = price?.raw as { update_time?: string } | undefined;
+                const t = raw?.update_time;
+                if (!t) return null;
+                const timeMatch = t.match(/(\d{2}:\d{2})/);
+                const countMatch = t.match(/ครั้งที่\s*(\d+)/);
+                if (!timeMatch) return null;
+                const count = countMatch ? parseInt(countMatch[1]) : null;
+                const ordinal = count ? `${count}${['st','nd','rd'][count-1]||'th'} update today` : null;
+                return `${timeMatch[1]}${ordinal ? ` (${ordinal})` : ''}`;
+              })()}
+            />
+            <SectionDivider label="Portfolio" />
+            <PortfolioMetrics metrics={metrics} loading={loading} />
+            <SectionDivider label="Operations" />
+            <CashTracker
+              cashState={cashState}
+              currentPrice={usePrice || avgBuyPrice}
+              sma={bands?.sma || avgBuyPrice}
+              lowerBand={bands?.lowerBand || Math.round(avgBuyPrice * 0.94)}
+              avgBuyPrice={avgBuyPrice}
+              onUpdate={() => loadAll(true)}
+            />
+            <LotTable
+              lots={lots}
+              currentSellPrice={usePrice || avgBuyPrice}
+              onUpdate={() => loadAll(true)}
+            />
+            {bands && usePrice > 0 && (
+              <ScenarioGrid
+                currentPrice={usePrice}
+                sma={bands.sma}
+                lowerBand={bands.lowerBand}
+                cashInHand={cashState?.amount}
+              />
+            )}
+            <SectionDivider label="History" />
+            <CycleHistory cycles={cycles} onUpdate={() => loadAll(true)} />
+          </div>
         )}
 
-        {/* ── HISTORY ──────────────────────────────────────── */}
-        <SectionDivider label="History" />
-        <CycleHistory cycles={cycles} onUpdate={() => loadAll(true)} />
-        <TradingViewChart />
+        {/* ── TAB 2: MARKET ────────────────────────────────── */}
+        {activeTab === 'market' && (
+          <div className="space-y-6">
+            <MarketContext market={market} loading={loading} />
+            <BandPosition bandPosition={bandPosition} loading={loading} />
+            <TradingViewChart />
+          </div>
+        )}
 
         {lastUpdated && (
           <p className="text-center text-xs text-slate-700 pb-4">
