@@ -26,9 +26,9 @@ export async function GET() {
   }
 }
 
-// Get price history for Bollinger Band calculation
-// Returns ONE price per calendar day (daily average in Bangkok time)
-// so that the 20-period SMA is a true 20-day SMA, not a 7-day one
+// Get price history — one price per calendar day (Bangkok time).
+// No limit: full history is needed for signal backtesting (500+ days).
+// Bollinger Bands use slice(-20) internally so extra rows don't affect them.
 export async function POST() {
   try {
     const history = await query<{
@@ -43,11 +43,10 @@ export async function POST() {
        FROM price_history
        WHERE gold_bar_sell > 0
        GROUP BY DATE(timestamp AT TIME ZONE 'Asia/Bangkok')
-       ORDER BY DATE(timestamp AT TIME ZONE 'Asia/Bangkok') DESC
-       LIMIT 60`
+       ORDER BY DATE(timestamp AT TIME ZONE 'Asia/Bangkok') ASC`
     );
 
-    return NextResponse.json(history.reverse());
+    return NextResponse.json(history);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });
