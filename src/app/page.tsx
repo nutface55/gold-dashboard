@@ -16,6 +16,7 @@ import Seasonality from '@/components/Seasonality';
 import TakeProfitSignal from '@/components/TakeProfitSignal';
 import GoalTracker from '@/components/GoalTracker';
 import SimulatorTab from '@/components/SimulatorTab';
+import PortfolioChart from '@/components/PortfolioChart';
 
 import { GoldPrice } from '@/lib/price-fetcher';
 import { Lot, CashState, computePortfolioMetrics, generateActionPlan } from '@/lib/trading-rules';
@@ -368,6 +369,7 @@ export default function Dashboard() {
             />
             <SectionDivider label="Portfolio" />
             <PortfolioMetrics metrics={metrics} loading={loading} />
+            <PortfolioChart priceHistory={priceHistory} lots={lots} loading={loading} />
             <SectionDivider label="Operations" />
             <CashTracker
               cashState={cashState}
