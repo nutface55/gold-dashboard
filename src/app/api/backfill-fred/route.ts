@@ -113,3 +113,24 @@ export async function GET() {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
+// DELETE: remove old interpolated backfill records superseded by yahoo-backfill
+export async function DELETE() {
+  try {
+    const deleted = await query<{ count: string }>(
+      `WITH removed AS (
+        DELETE FROM price_history WHERE source = 'backfill' RETURNING id
+       )
+       SELECT COUNT(*) as count FROM removed`
+    );
+    const countResult = await query<{ count: string }>(`SELECT COUNT(*) as count FROM price_history`);
+    return NextResponse.json({
+      success: true,
+      deleted: parseInt(deleted[0]?.count || '0'),
+      totalRecords: parseInt(countResult[0]?.count || '0'),
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+}
