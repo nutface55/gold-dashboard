@@ -17,6 +17,7 @@ import SignalBacktest from '@/components/SignalBacktest';
 import TakeProfitSignal from '@/components/TakeProfitSignal';
 import GoalTracker from '@/components/GoalTracker';
 import SimulatorTab from '@/components/SimulatorTab';
+import CyclePlanner from '@/components/CyclePlanner';
 import PortfolioChart from '@/components/PortfolioChart';
 
 import { GoldPrice } from '@/lib/price-fetcher';
@@ -70,7 +71,7 @@ export default function Dashboard() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [initAttempted, setInitAttempted] = useState(false);
   const [market, setMarket] = useState<MarketData | null>(null);
-  const [activeTab, setActiveTab] = useState<'portfolio' | 'market' | 'simulate'>('portfolio');
+  const [activeTab, setActiveTab] = useState<'portfolio' | 'market' | 'simulate' | 'cycle'>('portfolio');
 
   const fetchPrice = async (): Promise<GoldPrice | null> => {
     try {
@@ -298,7 +299,7 @@ export default function Dashboard() {
         {/* Tab bar */}
         <div className="border-t border-slate-800">
           <div className="max-w-5xl mx-auto px-4 flex">
-            {(['portfolio', 'market', 'simulate'] as const).map(tab => (
+            {(['portfolio', 'market', 'cycle', 'simulate'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -308,7 +309,7 @@ export default function Dashboard() {
                     : 'border-transparent text-slate-500 hover:text-slate-300'
                 }`}
               >
-                {tab === 'portfolio' ? 'Portfolio' : tab === 'market' ? 'Market' : 'Simulate'}
+                {tab === 'portfolio' ? 'Portfolio' : tab === 'market' ? 'Market' : tab === 'cycle' ? 'Cycle' : 'Simulate'}
               </button>
             ))}
           </div>
@@ -419,7 +420,16 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ── TAB 3: SIMULATE ──────────────────────────────── */}
+        {/* ── TAB 3: CYCLE ─────────────────────────────────── */}
+        {activeTab === 'cycle' && bands && usePrice > 0 && (
+          <CyclePlanner
+            currentSellPrice={usePrice}
+            sma={bands.sma}
+            lowerBand={bands.lowerBand}
+          />
+        )}
+
+        {/* ── TAB 4: SIMULATE ──────────────────────────────── */}
         {activeTab === 'simulate' && (
           <SimulatorTab
             lots={lots}
