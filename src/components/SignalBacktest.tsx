@@ -62,8 +62,15 @@ function computeDays(history: PricePoint[]): DayData[] {
 // ── Metrics ────────────────────────────────────────────────────────────
 
 // Buy signals: was price higher N days later?
+// Only counts the first day of each consecutive cluster.
 function buyHitRate(days: DayData[], signal: Signal, forward: number) {
-  const targets = days.filter(d => d.signal === signal);
+  const targets: DayData[] = [];
+  for (let i = 0; i < days.length; i++) {
+    if (days[i].signal === signal && (i === 0 || days[i - 1].signal !== signal)) {
+      targets.push(days[i]);
+    }
+  }
+
   let checked = 0, hits = 0, totalMove = 0;
 
   for (const t of targets) {
@@ -85,14 +92,23 @@ function buyHitRate(days: DayData[], signal: Signal, forward: number) {
   };
 }
 
-// Sell signals: did price pull back ≥3% at any point within 30 days?
-// This is the right metric — the user sells high and waits for a dip to rebuy.
-function sellHitRate(days: DayData[], signal: Signal, pullbackPct = 3, withinDays = 30) {
-  const targets = days.filter(d => d.signal === signal);
+// Sell signals: did price pull back ≥3% at any point within 60 days?
+// Only counts the FIRST day of each consecutive sell-signal cluster — avoids
+// inflating counts when a signal persists for multiple days in a row.
+function sellHitRate(days: DayData[], signal: Signal, pullbackPct = 3, withinDays = 60) {
+  // Deduplicate: keep only the first day of each consecutive cluster
+  const clusterStarts: DayData[] = [];
+  for (let i = 0; i < days.length; i++) {
+    if (days[i].signal === signal) {
+      const prev = i > 0 ? days[i - 1].signal : null;
+      if (prev !== signal) clusterStarts.push(days[i]);
+    }
+  }
+
   let checked = 0, hits = 0;
   let totalMaxPullback = 0;
 
-  for (const t of targets) {
+  for (const t of clusterStarts) {
     const maxDate = new Date(t.date);
     maxDate.setDate(maxDate.getDate() + withinDays);
 
@@ -112,7 +128,7 @@ function sellHitRate(days: DayData[], signal: Signal, pullbackPct = 3, withinDay
   }
 
   return {
-    count: targets.length,
+    count: clusterStarts.length,
     checked,
     hitRate: checked > 0 ? Math.round((hits / checked) * 100) : null,
     avgPullback: checked > 0 ? Math.round((totalMaxPullback / checked) * 10) / 10 : null,
@@ -208,7 +224,7 @@ export default function SignalBacktest({ priceHistory }: Props) {
         <span className="text-xs text-slate-600 ml-auto">{days.length} days of data</span>
       </div>
       <p className="text-xs text-slate-500 mb-4 pl-3">
-        Buy signals: was price higher 60 days later? · Sell signals: did price dip ≥3% within 30 days?
+        Buy signals: was price higher 60 days later? · Sell signals: did price dip ≥3% within 60 days? (first signal of each move only)
       </p>
 
       <div className="space-y-2">
@@ -273,7 +289,7 @@ export default function SignalBacktest({ priceHistory }: Props) {
       </div>
 
       <p className="text-xs text-slate-700 mt-4 pt-3 border-t border-slate-800">
-        Sell signals now require RSI confirmation (≥65 mild, ≥70 strong) + ≥6% above SMA. Sell hit = price dipped ≥3% within 30 days (enough to rebuy cheaper). The dashboard also requires P&L ≥ 12–15% before recommending a sale.
+        Sell signals require RSI ≥ 65–70 + ≥6% above SMA. Each sell event counted once (first day of the move). Sell hit = price dipped ≥3% within 60 days — enough to rebuy cheaper. Dashboard also requires P&L ≥ 12–15%.
       </p>
     </div>
   );
