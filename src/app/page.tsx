@@ -200,6 +200,15 @@ export default function Dashboard() {
 
   const metrics = computePortfolioMetrics(lots, usePrice || avgBuyPrice);
 
+  // Chart price history: replace/add today's entry with the live price so
+  // the chart P&L always matches the metrics card exactly.
+  const chartPriceHistory = usePrice > 0
+    ? [
+        ...priceHistory.filter(p => p.date.split('T')[0] < new Date().toISOString().split('T')[0]),
+        { date: new Date().toISOString(), price: usePrice },
+      ]
+    : priceHistory;
+
   const actionPlan = bandPosition && metrics
     ? generateActionPlan(bandPosition, metrics, cashState, lots, usePrice)
     : null;
@@ -369,7 +378,7 @@ export default function Dashboard() {
             />
             <SectionDivider label="Portfolio" />
             <PortfolioMetrics metrics={metrics} loading={loading} />
-            <PortfolioChart priceHistory={priceHistory} lots={lots} loading={loading} />
+            <PortfolioChart priceHistory={chartPriceHistory} lots={lots} loading={loading} />
             <SectionDivider label="Operations" />
             <CashTracker
               cashState={cashState}
