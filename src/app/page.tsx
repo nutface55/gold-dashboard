@@ -27,8 +27,10 @@ interface MarketData {
   goldChange7d: number | null;
   gold52wHigh: number | null;
   gold52wLow: number | null;
-  tnxYield: number | null;
-  tnxChange: number | null;
+  realYield: number | null;
+  realYieldChange: number | null;
+  inflationBreakeven: number | null;
+  goldSilverRatio: number | null;
   vix: number | null;
   fedRate: number | null;
   source: string;

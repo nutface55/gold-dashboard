@@ -8,8 +8,10 @@ interface MarketData {
   goldChange7d: number | null;
   gold52wHigh: number | null;
   gold52wLow: number | null;
-  tnxYield: number | null;
-  tnxChange: number | null;
+  realYield: number | null;
+  realYieldChange: number | null;
+  inflationBreakeven: number | null;
+  goldSilverRatio: number | null;
   vix: number | null;
   fedRate: number | null;
 }
@@ -49,12 +51,32 @@ function get52wSignal(spot: number | null, high: number | null, low: number | nu
   return { label: 'Yearly range', text: 'Sitting in the middle of its yearly range', detail, tone: 'yellow' };
 }
 
-function getTnxSignal(change: number | null, yield_: number | null): Signal | null {
-  if (change === null || yield_ === null) return null;
-  const detail = `US 10-year Treasury yield: ${yield_.toFixed(2)}% (${change >= 0 ? '+' : ''}${change.toFixed(2)}% today)`;
-  if (change <= -0.03) return { label: 'Bond yields', text: 'Bond yields are falling — good for gold', detail, tone: 'green' };
-  if (change >= 0.03)  return { label: 'Bond yields', text: 'Bond yields are rising — puts pressure on gold', detail, tone: 'red' };
-  return { label: 'Bond yields', text: 'Bond yields are stable — no strong push on gold', detail, tone: 'yellow' };
+function getRealYieldSignal(yield_: number | null, change: number | null): Signal | null {
+  if (yield_ === null) return null;
+  const sign = change !== null ? (change >= 0 ? '+' : '') : '';
+  const changeStr = change !== null ? ` (${sign}${change.toFixed(2)}% today)` : '';
+  const detail = `US 10-year real yield (TIPS): ${yield_.toFixed(2)}%${changeStr} — real = nominal minus inflation`;
+  if (yield_ < 0)   return { label: 'Real rates', text: 'Real rates are negative — money loses value in bonds, gold wins', detail, tone: 'green' };
+  if (yield_ < 1)   return { label: 'Real rates', text: 'Real rates are low — mild support for gold', detail, tone: 'green' };
+  if (yield_ < 2)   return { label: 'Real rates', text: 'Real rates are moderate — neutral for gold', detail, tone: 'yellow' };
+  return { label: 'Real rates', text: 'Real rates are high — bonds compete with gold, headwind', detail, tone: 'red' };
+}
+
+function getInflationSignal(breakeven: number | null): Signal | null {
+  if (breakeven === null) return null;
+  const detail = `10-year inflation breakeven: ${breakeven.toFixed(2)}% — market's expected avg inflation over 10 years`;
+  if (breakeven >= 2.5) return { label: 'Inflation expectations', text: 'Inflation fears are rising — gold is an inflation hedge, this helps', detail, tone: 'green' };
+  if (breakeven >= 2.0) return { label: 'Inflation expectations', text: 'Inflation expectations are normal — neutral for gold', detail, tone: 'yellow' };
+  return { label: 'Inflation expectations', text: 'Inflation expectations are low — less urgency to hold gold as a hedge', detail, tone: 'yellow' };
+}
+
+function getGoldSilverSignal(ratio: number | null): Signal | null {
+  if (ratio === null) return null;
+  const detail = `Gold/Silver ratio: ${ratio.toFixed(1)} — how many ounces of silver equal one ounce of gold`;
+  if (ratio > 90)  return { label: 'Gold vs Silver', text: 'Gold is very expensive vs silver — historically a sign gold may cool off', detail, tone: 'red' };
+  if (ratio > 80)  return { label: 'Gold vs Silver', text: 'Gold is pricey relative to silver — mild caution signal', detail, tone: 'yellow' };
+  if (ratio < 60)  return { label: 'Gold vs Silver', text: 'Gold is cheap relative to silver — historically a good time to buy', detail, tone: 'green' };
+  return { label: 'Gold vs Silver', text: 'Gold/Silver ratio is in normal range — no strong signal', detail, tone: 'yellow' };
 }
 
 function getVixSignal(vix: number | null): Signal | null {
@@ -116,7 +138,9 @@ export default function MarketContext({ market, loading }: Props) {
 
   const signals = [
     getDxySignal(market.dxyChange),
-    getTnxSignal(market.tnxChange ?? null, market.tnxYield ?? null),
+    getRealYieldSignal(market.realYield ?? null, market.realYieldChange ?? null),
+    getInflationSignal(market.inflationBreakeven ?? null),
+    getGoldSilverSignal(market.goldSilverRatio ?? null),
     getVixSignal(market.vix ?? null),
     getMomentumSignal(market.goldChange7d),
     get52wSignal(market.usdSpot, market.gold52wHigh, market.gold52wLow),
