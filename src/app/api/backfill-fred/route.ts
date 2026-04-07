@@ -114,7 +114,7 @@ export async function GET() {
   }
 }
 
-// DELETE: remove old interpolated backfill records superseded by yahoo-backfill
+// DELETE: remove old interpolated backfill records superseded by yahoo-backfill (v2)
 export async function DELETE() {
   try {
     const deleted = await query<{ count: string }>(
