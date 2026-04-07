@@ -186,8 +186,9 @@ export function generateActionPlan(
 
   // ─── Priority 2: SELL signals (tightened thresholds) ────────────────────
 
-  // Strong sell: above upper band + P&L ≥ 15%
-  if (bandPosition.zone === 'strong_sell' && pnlPercent >= 15) {
+  // Strong sell: above upper band + P&L ≥ 15% + RSI confirms overbought
+  const rsiConfirmsStrongSell = !rsiReliable || rsi >= 70;
+  if (bandPosition.zone === 'strong_sell' && pnlPercent >= 15 && rsiConfirmsStrongSell) {
     const scenarios = calculateScenarios(bandPosition.currentPrice, bandPosition.sma, bandPosition.lowerBand);
     const best = scenarios.find(s => s.isViable && s.sellWeight === 10);
     const dropToSma = Math.round((1 - bandPosition.sma / bandPosition.currentPrice) * 100);
@@ -201,14 +202,15 @@ export function generateActionPlan(
     };
   }
 
-  // Mild sell: above SMA by ≥ 4% + P&L ≥ 12%
-  if (percentAboveSma >= 4 && pnlPercent >= 12) {
+  // Mild sell: above SMA by ≥ 6% + P&L ≥ 12% + RSI confirms overextended
+  const rsiConfirmsMildSell = !rsiReliable || rsi >= 65;
+  if (percentAboveSma >= 6 && pnlPercent >= 12 && rsiConfirmsMildSell) {
     const scenarios = calculateScenarios(bandPosition.currentPrice, bandPosition.sma, bandPosition.lowerBand);
     const best = scenarios.find(s => s.isViable && s.sellWeight === 5);
     return {
       signal: 'mild_sell',
       headline: 'Consider selling a 5B brick — price is meaningfully above average',
-      detail: `Gold is ${percentAboveSma.toFixed(1)}% above its 20-day average — high enough to be worth acting on. Selling a 5B brick now and buying back when it cools down is a solid move. Not urgent, but worth doing.\n\n📊 Technical: Price is ${percentAboveSma.toFixed(1)}% above SMA (฿${bandPosition.sma.toLocaleString()}). Mild sell threshold: 4% above SMA with P&L ≥ 12%. Current P&L: ${pnlPercent.toFixed(1)}%.${rsiNote}`,
+      detail: `Gold is ${percentAboveSma.toFixed(1)}% above its 20-day average — high enough to be worth acting on. Selling a 5B brick now and buying back when it cools down is a solid move. Not urgent, but worth doing.\n\n📊 Technical: Price is ${percentAboveSma.toFixed(1)}% above SMA (฿${bandPosition.sma.toLocaleString()}). Mild sell threshold: 6% above SMA + P&L ≥ 12% + RSI ≥ 65. Current P&L: ${pnlPercent.toFixed(1)}%.${rsiNote}`,
       mathVerification: best ? formatMathVerification(best) : undefined,
       bestScenario: best,
       rebuySummary: buildRebuySummary(5, bandPosition.currentPrice, bandPosition.sma, bandPosition.lowerBand),
