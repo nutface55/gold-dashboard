@@ -12,6 +12,7 @@ import TradingViewChart from '@/components/TradingViewChart';
 import CycleHistory from '@/components/CycleHistory';
 import MarketContext from '@/components/MarketContext';
 import FedWatch from '@/components/FedWatch';
+import Seasonality from '@/components/Seasonality';
 import TakeProfitSignal from '@/components/TakeProfitSignal';
 import GoalTracker from '@/components/GoalTracker';
 import SimulatorTab from '@/components/SimulatorTab';
@@ -400,6 +401,7 @@ export default function Dashboard() {
             <TradingViewChart />
             <MarketContext market={market} loading={loading} />
             <FedWatch fedRate={market?.fedRate ?? null} loading={loading} />
+            <Seasonality />
             <BandPosition bandPosition={bandPosition} loading={loading} />
           </div>
         )}
