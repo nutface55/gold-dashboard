@@ -6,7 +6,6 @@ import ActionPlan from '@/components/ActionPlan';
 import BandPosition from '@/components/BandPosition';
 import CashTracker from '@/components/CashTracker';
 import PortfolioMetrics from '@/components/PortfolioMetrics';
-import ScenarioGrid from '@/components/ScenarioGrid';
 import LotTable from '@/components/LotTable';
 import TradingViewChart from '@/components/TradingViewChart';
 import CycleHistory from '@/components/CycleHistory';
@@ -390,14 +389,6 @@ export default function Dashboard() {
               avgBuyPrice={avgBuyPrice}
               onUpdate={() => loadAll(true)}
             />
-            {bands && usePrice > 0 && (
-              <ScenarioGrid
-                currentPrice={usePrice}
-                sma={bands.sma}
-                lowerBand={bands.lowerBand}
-                cashInHand={cashState?.amount}
-              />
-            )}
             <LotTable
               lots={lots}
               currentSellPrice={usePrice || avgBuyPrice}
@@ -436,7 +427,6 @@ export default function Dashboard() {
             currentSellPrice={currentSellPrice}
             currentBuyPrice={currentBuyPrice}
             metrics={metrics}
-            bands={bands}
           />
         )}
 

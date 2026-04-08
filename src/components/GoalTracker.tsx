@@ -114,7 +114,6 @@ export default function GoalTracker({ bandPosition, metrics, loading }: Props) {
   const cfg = config[plan.signal];
   const Icon = cfg.Icon;
 
-  const progressPct = Math.min(100, Math.round((metrics.totalWeight / 150) * 100));
   const overallPnlPct = metrics.pnlPercent;
 
   return (
@@ -137,30 +136,17 @@ export default function GoalTracker({ bandPosition, metrics, loading }: Props) {
       <p className="text-base font-semibold text-white mb-1">{plan.headline}</p>
       <p className="text-sm text-slate-400 leading-relaxed mb-4">{plan.detail}</p>
 
-      {/* Progress strip */}
-      <div className="border-t border-white/10 pt-3">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-xs text-slate-500">Progress to 150B</span>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-500 font-mono">
-              Overall avg ฿{metrics.avgBuyPrice.toLocaleString()}
-            </span>
-            <span className={`text-xs font-mono font-medium ${overallPnlPct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {overallPnlPct >= 0 ? '+' : ''}{overallPnlPct.toFixed(1)}% P&L
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-yellow-500 rounded-full transition-all"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-          <span className="text-xs font-mono text-slate-400 whitespace-nowrap text-right">
-            {metrics.totalWeight}B / 150B
-          </span>
-        </div>
+      {/* Stats strip — no progress bar (duplicates PortfolioMetrics) */}
+      <div className="border-t border-white/10 pt-3 flex items-center gap-4">
+        <span className="text-xs text-slate-500">
+          {metrics.totalWeight}B of 150B · {150 - metrics.totalWeight}B to go
+        </span>
+        <span className="text-xs text-slate-500 font-mono">
+          avg ฿{metrics.avgBuyPrice.toLocaleString()}
+        </span>
+        <span className={`text-xs font-mono font-medium ml-auto ${overallPnlPct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+          {overallPnlPct >= 0 ? '+' : ''}{overallPnlPct.toFixed(1)}% P&L
+        </span>
       </div>
     </div>
   );

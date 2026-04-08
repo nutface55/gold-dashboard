@@ -2,14 +2,12 @@
 
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { Lot, isLockedLot, PortfolioMetrics } from '@/lib/trading-rules';
-import { BandData } from '@/lib/band-calculator';
 
 interface Props {
   lots: Lot[];
   currentSellPrice: number;
   currentBuyPrice: number;
   metrics: PortfolioMetrics;
-  bands: BandData | null;
 }
 
 function simulateBuy(
@@ -32,18 +30,10 @@ function simulateSell(
   weight: number,
   sellPrice: number,
   lots: Lot[],
-  metrics: PortfolioMetrics,
-  bands: BandData | null
+  metrics: PortfolioMetrics
 ) {
   const cash = weight * sellPrice;
   const newTotalWeight = metrics.totalWeight - weight;
-
-  // Rebuy scenarios
-  // Only show rebuy scenarios where the rebuy price is cheaper than the sell price
-  const rebuyAtSma = bands && bands.sma < sellPrice ? Math.floor(cash / bands.sma / 5) * 5 : null;
-  const rebuyAtLower = bands && bands.lowerBand < sellPrice ? Math.floor(cash / bands.lowerBand / 5) * 5 : null;
-  const netAtSma = rebuyAtSma !== null ? rebuyAtSma - weight : null;
-  const netAtLower = rebuyAtLower !== null ? rebuyAtLower - weight : null;
 
   // Find which lots would be sold (most profitable tradable first)
   const tradable = lots
@@ -64,11 +54,10 @@ function simulateSell(
     : 0;
   const profitLocked = soldLots.length > 0 ? (sellPrice - avgSoldCost) * weight : 0;
 
-  // Tradable remaining after sell
   const tradableWeight = lots.filter(l => !isLockedLot(l, sellPrice)).reduce((s, l) => s + l.weight, 0);
   const newTradableWeight = tradableWeight - weight;
 
-  return { cash, newTotalWeight, newTradableWeight, tradableWeight, rebuyAtSma, rebuyAtLower, netAtSma, netAtLower, avgSoldCost, profitLocked };
+  return { cash, newTotalWeight, newTradableWeight, tradableWeight, avgSoldCost, profitLocked };
 }
 
 interface BuyCardProps {
@@ -133,10 +122,9 @@ interface SellCardProps {
   sellPrice: number;
   lots: Lot[];
   metrics: PortfolioMetrics;
-  bands: BandData | null;
 }
 
-function SellCard({ weight, sellPrice, lots, metrics, bands }: SellCardProps) {
+function SellCard({ weight, sellPrice, lots, metrics }: SellCardProps) {
   if (!sellPrice) return null;
   const tradableWeight = metrics.tradableWeight;
   if (tradableWeight < weight) {
@@ -151,7 +139,7 @@ function SellCard({ weight, sellPrice, lots, metrics, bands }: SellCardProps) {
     );
   }
 
-  const sim = simulateSell(weight, sellPrice, lots, metrics, bands);
+  const sim = simulateSell(weight, sellPrice, lots, metrics);
 
   return (
     <div className="bg-slate-900 border border-orange-800/50 rounded-lg p-5">
@@ -177,48 +165,9 @@ function SellCard({ weight, sellPrice, lots, metrics, bands }: SellCardProps) {
           sub={`was ${sim.tradableWeight}B tradable → -${weight}B`}
           subColor="text-slate-500"
         />
-
-        {/* Rebuy scenarios — only shown when a cheaper entry exists */}
-        {bands && (sim.rebuyAtSma !== null || sim.rebuyAtLower !== null) && (
-          <div className="border-t border-slate-800 pt-3 mt-1 space-y-2">
-            <p className="text-xs text-slate-600 uppercase tracking-wide mb-2">If price drops and you rebuy</p>
-            {sim.rebuyAtSma !== null && (
-              <Row
-                label={`At SMA ฿${bands.sma.toLocaleString()}`}
-                value={`${sim.rebuyAtSma}B back`}
-                sub={sim.netAtSma !== null
-                  ? sim.netAtSma > 0
-                    ? `+${sim.netAtSma}B more gold than you sold`
-                    : sim.netAtSma === 0
-                    ? 'same amount back'
-                    : `${sim.netAtSma}B less than you sold`
-                  : ''}
-                subColor={sim.netAtSma !== null && sim.netAtSma >= 0 ? 'text-green-400' : 'text-red-400'}
-                mono
-              />
-            )}
-            {sim.rebuyAtLower !== null && (
-              <Row
-                label={`At lower band ฿${bands.lowerBand.toLocaleString()}`}
-                value={`${sim.rebuyAtLower}B back`}
-                sub={sim.netAtLower !== null
-                  ? sim.netAtLower > 0
-                    ? `+${sim.netAtLower}B more gold than you sold`
-                    : sim.netAtLower === 0
-                    ? 'same amount back'
-                    : `${sim.netAtLower}B less than you sold`
-                  : ''}
-                subColor={sim.netAtLower !== null && sim.netAtLower >= 0 ? 'text-green-400' : 'text-red-400'}
-                mono
-              />
-            )}
-          </div>
-        )}
-        {bands && sim.rebuyAtSma === null && sim.rebuyAtLower === null && (
-          <p className="text-xs text-slate-600 border-t border-slate-800 pt-3 mt-1">
-            Current price is already at or below SMA — no cheaper rebuy entry available right now.
-          </p>
-        )}
+        <p className="text-xs text-slate-600 border-t border-slate-800 pt-3">
+          Use the Cycle tab to model rebuy levels and leftover cash.
+        </p>
       </div>
     </div>
   );
@@ -247,7 +196,7 @@ function Row({
   );
 }
 
-export default function SimulatorTab({ lots, currentSellPrice, currentBuyPrice, metrics, bands }: Props) {
+export default function SimulatorTab({ lots, currentSellPrice, currentBuyPrice, metrics }: Props) {
   const price = currentSellPrice || currentBuyPrice;
 
   if (!price) {
@@ -271,8 +220,8 @@ export default function SimulatorTab({ lots, currentSellPrice, currentBuyPrice, 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <BuyCard weight={5} buyPrice={currentBuyPrice || price} metrics={metrics} />
         <BuyCard weight={10} buyPrice={currentBuyPrice || price} metrics={metrics} />
-        <SellCard weight={5} sellPrice={currentSellPrice || price} lots={lots} metrics={metrics} bands={bands} />
-        <SellCard weight={10} sellPrice={currentSellPrice || price} lots={lots} metrics={metrics} bands={bands} />
+        <SellCard weight={5} sellPrice={currentSellPrice || price} lots={lots} metrics={metrics} />
+        <SellCard weight={10} sellPrice={currentSellPrice || price} lots={lots} metrics={metrics} />
       </div>
     </div>
   );
