@@ -348,38 +348,47 @@ export default function Dashboard() {
         {/* ── TAB 1: PORTFOLIO ─────────────────────────────── */}
         {activeTab === 'portfolio' && (
           <div className="space-y-6">
-            <ActionPlan
-              plan={actionPlan}
-              loading={loading}
-              lastUpdated={lastUpdated}
-              priceUpdateTime={(() => {
-                const raw = price?.raw as { update_time?: string } | undefined;
-                const t = raw?.update_time;
-                if (!t) return null;
-                const timeMatch = t.match(/(\d{2}:\d{2})/);
-                const countMatch = t.match(/ครั้งที่\s*(\d+)/);
-                if (!timeMatch) return null;
-                const count = countMatch ? parseInt(countMatch[1]) : null;
-                const ordinal = count ? `${count}${['st','nd','rd'][count-1]||'th'} update today` : null;
-                return `${timeMatch[1]}${ordinal ? ` (${ordinal})` : ''}`;
-              })()}
-            />
-            {usePrice > 0 && (
-              <TradablePool
-                lots={lots}
-                currentSellPrice={usePrice}
-                actionPlanSignal={actionPlan?.signal}
+
+            {/* ── Group 1: Recommendations ── */}
+            <SectionDivider label="Recommendations" />
+            <div className="space-y-3">
+              <ActionPlan
+                plan={actionPlan}
+                loading={loading}
+                lastUpdated={lastUpdated}
+                priceUpdateTime={(() => {
+                  const raw = price?.raw as { update_time?: string } | undefined;
+                  const t = raw?.update_time;
+                  if (!t) return null;
+                  const timeMatch = t.match(/(\d{2}:\d{2})/);
+                  const countMatch = t.match(/ครั้งที่\s*(\d+)/);
+                  if (!timeMatch) return null;
+                  const count = countMatch ? parseInt(countMatch[1]) : null;
+                  const ordinal = count ? `${count}${['st','nd','rd'][count-1]||'th'} update today` : null;
+                  return `${timeMatch[1]}${ordinal ? ` (${ordinal})` : ''}`;
+                })()}
               />
-            )}
-            <GoalTracker
-              bandPosition={bandPosition}
-              metrics={metrics}
-              loading={loading}
-            />
+              {usePrice > 0 && (
+                <TradablePool
+                  lots={lots}
+                  currentSellPrice={usePrice}
+                  actionPlanSignal={actionPlan?.signal}
+                />
+              )}
+              <GoalTracker
+                bandPosition={bandPosition}
+                metrics={metrics}
+                loading={loading}
+              />
+            </div>
+
+            {/* ── Group 2: How am I doing? ── */}
             <SectionDivider label="Portfolio" />
             <PortfolioMetrics metrics={metrics} loading={loading} />
             <PortfolioChart priceHistory={chartPriceHistory} lots={lots} loading={loading} />
-            <SectionDivider label="Operations" />
+
+            {/* ── Group 3: Manage my positions ── */}
+            <SectionDivider label="Positions" />
             <CashTracker
               cashState={cashState}
               currentPrice={usePrice || avgBuyPrice}
@@ -393,6 +402,8 @@ export default function Dashboard() {
               currentSellPrice={usePrice || avgBuyPrice}
               onUpdate={() => loadAll(true)}
             />
+
+            {/* ── Group 4: What have I done? ── */}
             <SectionDivider label="History" />
             <CycleHistory cycles={cycles} onUpdate={() => loadAll(true)} />
           </div>

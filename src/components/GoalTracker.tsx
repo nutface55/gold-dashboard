@@ -122,9 +122,9 @@ export default function GoalTracker({ bandPosition, metrics, loading }: Props) {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <PiggyBank className="w-3.5 h-3.5 text-slate-500" />
-          <span className="text-xs text-slate-500 uppercase tracking-wide font-medium">Goal Tracker</span>
+          <span className="text-xs text-slate-500 uppercase tracking-wide font-medium">Capital Signal</span>
         </div>
-        <span className="text-xs text-slate-600 italic">Fresh capital → long-term 150B stack</span>
+        <span className="text-xs text-slate-600 italic">fresh money → long-term 150B stack</span>
       </div>
 
       {/* Signal */}

@@ -114,10 +114,10 @@ export default function TradablePool({ lots, currentSellPrice, actionPlanSignal 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-sm font-semibold text-slate-200 border-l-2 border-amber-500 pl-2">
-            Tradable Pool · Sell Priority
-          </h3>
-          <p className="text-xs text-slate-500 mt-0.5 pl-3">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs text-slate-500 uppercase tracking-wide font-medium">Which Lot to Sell</span>
+          </div>
+          <p className="text-xs text-slate-500 pl-4">
             Highest cost first — every sell lowers your tradable avg
           </p>
         </div>
