@@ -12,7 +12,6 @@ import CycleHistory from '@/components/CycleHistory';
 import MarketContext from '@/components/MarketContext';
 import FedWatch from '@/components/FedWatch';
 import Seasonality from '@/components/Seasonality';
-import SignalBacktest from '@/components/SignalBacktest';
 import TradablePool from '@/components/TradablePool';
 import GoalTracker from '@/components/GoalTracker';
 import SimulatorTab from '@/components/SimulatorTab';
@@ -416,7 +415,6 @@ export default function Dashboard() {
             <MarketContext market={market} loading={loading} />
             <FedWatch fedRate={market?.fedRate ?? null} loading={loading} />
             <Seasonality />
-            <SignalBacktest priceHistory={priceHistory} />
             <BandPosition bandPosition={bandPosition} loading={loading} />
           </div>
         )}
