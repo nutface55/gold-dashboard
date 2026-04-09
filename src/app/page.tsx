@@ -13,7 +13,7 @@ import MarketContext from '@/components/MarketContext';
 import FedWatch from '@/components/FedWatch';
 import Seasonality from '@/components/Seasonality';
 import SignalBacktest from '@/components/SignalBacktest';
-import TakeProfitSignal from '@/components/TakeProfitSignal';
+import TradablePool from '@/components/TradablePool';
 import GoalTracker from '@/components/GoalTracker';
 import SimulatorTab from '@/components/SimulatorTab';
 import CyclePlanner from '@/components/CyclePlanner';
@@ -365,11 +365,10 @@ export default function Dashboard() {
               })()}
             />
             {usePrice > 0 && (
-              <TakeProfitSignal
+              <TradablePool
                 lots={lots}
                 currentSellPrice={usePrice}
-                bandPosition={bandPosition}
-                market={market}
+                actionPlanSignal={actionPlan?.signal}
               />
             )}
             <GoalTracker
