@@ -76,9 +76,12 @@ function getTopLot(lots: Lot[], sellPrice: number) {
   const totalWeight   = tradable.reduce((s, { lot }) => s + lot.weight, 0);
   const currentAvg    = Math.round(totalInvested / totalWeight);
 
-  // Highest cost first; skip near-lock lots (P&L 35–40%)
+  // Highest cost first; skip underwater lots and near-lock lots (P&L 35–40%)
   const sorted = [...tradable].sort((a, b) => b.lot.buy_price - a.lot.buy_price);
-  const top = sorted.find(({ lot }) => ((sellPrice - lot.buy_price) / lot.buy_price) * 100 < NEAR_LOCK_PCT);
+  const top = sorted.find(({ lot }) => {
+    const pct = ((sellPrice - lot.buy_price) / lot.buy_price) * 100;
+    return pct > 0 && pct < NEAR_LOCK_PCT;
+  });
   if (!top) return null;
 
   const profitPerBaht = sellPrice - top.lot.buy_price;

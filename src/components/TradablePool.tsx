@@ -35,9 +35,12 @@ function analyze(lots: Lot[], sellPrice: number) {
   const totalWeight   = tradable.reduce((s, { lot }) => s + lot.weight, 0);
   const currentAvg    = Math.round(totalInvested / totalWeight);
 
-  const sorted = [...tradable].sort((a, b) => b.lot.buy_price - a.lot.buy_price);
+  // Only include lots that are currently in profit; skip underwater lots
+  const inProfit = [...tradable]
+    .filter(({ lot }) => sellPrice > lot.buy_price)
+    .sort((a, b) => b.lot.buy_price - a.lot.buy_price);
 
-  const analyses: LotAnalysis[] = sorted.map(({ lot, lotNumber }, i) => {
+  const analyses: LotAnalysis[] = inProfit.map(({ lot, lotNumber }, i) => {
     const profitPerBaht = sellPrice - lot.buy_price;
     const totalProfit   = profitPerBaht * lot.weight;
     const profitPct     = (profitPerBaht / lot.buy_price) * 100;
