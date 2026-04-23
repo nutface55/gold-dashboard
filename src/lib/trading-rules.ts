@@ -43,6 +43,7 @@ export interface ActionPlan {
   mathVerification?: string;
   bestScenario?: BuybackScenario;
   rebuySummary?: string;        // sell→rebuy preview shown at point of sell decision
+  rebuyStrategy?: 'fast' | 'patient'; // 'fast' = aim for SMA, 'patient' = aim for lower band
   daysSinceSale?: number;
   cashWarning?: boolean;
   injectionImpact?: ReturnType<typeof calculateInjectionImpact>;
@@ -199,6 +200,7 @@ export function generateActionPlan(
       mathVerification: best ? formatMathVerification(best) : undefined,
       bestScenario: best,
       rebuySummary: buildRebuySummary(10, bandPosition.currentPrice, bandPosition.sma, bandPosition.lowerBand),
+      rebuyStrategy: 'patient',
     };
   }
 
@@ -214,6 +216,7 @@ export function generateActionPlan(
       mathVerification: best ? formatMathVerification(best) : undefined,
       bestScenario: best,
       rebuySummary: buildRebuySummary(5, bandPosition.currentPrice, bandPosition.sma, bandPosition.lowerBand),
+      rebuyStrategy: 'fast',
     };
   }
 

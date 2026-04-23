@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, AlertCircle, Wifi, WifiOff } from 'lucide-react';
-import ActionPlan from '@/components/ActionPlan';
+import TodaysMove from '@/components/TodaysMove';
 import BandPosition from '@/components/BandPosition';
 import CashTracker from '@/components/CashTracker';
 import PortfolioMetrics from '@/components/PortfolioMetrics';
@@ -12,8 +12,6 @@ import CycleHistory from '@/components/CycleHistory';
 import MarketContext from '@/components/MarketContext';
 import FedWatch from '@/components/FedWatch';
 import Seasonality from '@/components/Seasonality';
-import TradablePool from '@/components/TradablePool';
-import GoalTracker from '@/components/GoalTracker';
 import SimulatorTab from '@/components/SimulatorTab';
 import CyclePlanner from '@/components/CyclePlanner';
 import PortfolioChart from '@/components/PortfolioChart';
@@ -350,36 +348,26 @@ export default function Dashboard() {
 
             {/* ── Group 1: Recommendations ── */}
             <SectionDivider label="Recommendations" />
-            <div className="space-y-3">
-              <ActionPlan
-                plan={actionPlan}
-                loading={loading}
-                lastUpdated={lastUpdated}
-                priceUpdateTime={(() => {
-                  const raw = price?.raw as { update_time?: string } | undefined;
-                  const t = raw?.update_time;
-                  if (!t) return null;
-                  const timeMatch = t.match(/(\d{2}:\d{2})/);
-                  const countMatch = t.match(/ครั้งที่\s*(\d+)/);
-                  if (!timeMatch) return null;
-                  const count = countMatch ? parseInt(countMatch[1]) : null;
-                  const ordinal = count ? `${count}${['st','nd','rd'][count-1]||'th'} update today` : null;
-                  return `${timeMatch[1]}${ordinal ? ` (${ordinal})` : ''}`;
-                })()}
-              />
-              {usePrice > 0 && (
-                <TradablePool
-                  lots={lots}
-                  currentSellPrice={usePrice}
-                  actionPlanSignal={actionPlan?.signal}
-                />
-              )}
-              <GoalTracker
-                bandPosition={bandPosition}
-                metrics={metrics}
-                loading={loading}
-              />
-            </div>
+            <TodaysMove
+              plan={actionPlan}
+              lots={lots}
+              currentSellPrice={usePrice}
+              bandPosition={bandPosition}
+              metrics={metrics}
+              loading={loading}
+              lastUpdated={lastUpdated}
+              priceUpdateTime={(() => {
+                const raw = price?.raw as { update_time?: string } | undefined;
+                const t = raw?.update_time;
+                if (!t) return null;
+                const timeMatch = t.match(/(\d{2}:\d{2})/);
+                const countMatch = t.match(/ครั้งที่\s*(\d+)/);
+                if (!timeMatch) return null;
+                const count = countMatch ? parseInt(countMatch[1]) : null;
+                const ordinal = count ? `${count}${['st','nd','rd'][count-1]||'th'} update today` : null;
+                return `${timeMatch[1]}${ordinal ? ` (${ordinal})` : ''}`;
+              })()}
+            />
 
             {/* ── Group 2: How am I doing? ── */}
             <SectionDivider label="Portfolio" />
