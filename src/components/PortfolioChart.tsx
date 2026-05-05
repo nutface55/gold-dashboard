@@ -51,9 +51,11 @@ function filterByRange(data: ReturnType<typeof buildChartData>, range: Range) {
 }
 
 function formatThb(val: number): string {
-  if (val >= 1_000_000) return `฿${(val / 1_000_000).toFixed(1)}M`;
-  if (val >= 1_000)     return `฿${(val / 1_000).toFixed(0)}k`;
-  return `฿${val}`;
+  const sign = val < 0 ? '-' : '';
+  const abs = Math.abs(val);
+  if (abs >= 1_000_000) return `${sign}฿${(abs / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000)     return `${sign}฿${(abs / 1_000).toFixed(0)}k`;
+  return `${sign}฿${abs}`;
 }
 
 function formatDate(dateStr: string): string {
