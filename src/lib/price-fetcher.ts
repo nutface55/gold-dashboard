@@ -82,42 +82,44 @@ async function fetchFromThaigold(): Promise<GoldPrice | null> {
   }
 }
 
-// Fallback: scrape goldtraders.or.th with cheerio
-async function fetchFromGoldtraders(): Promise<GoldPrice | null> {
+// Last resort: compute implied Thai gold price from XAU/USD (Yahoo Finance) + USD/THB (open.er-api.com)
+// Formula: spot_usd × (15.244g/31.1035g) × 0.965 purity × usdThb
+// barSell = implied (shop pays you ~spot), barBuy = implied + 200 (standard GTA spread)
+async function fetchImpliedFromSpot(): Promise<GoldPrice | null> {
   try {
-    const cheerio = await import('cheerio');
-    const { data: html } = await axios.get('https://www.goldtraders.or.th/', {
-      timeout: 10000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml',
-        'Accept-Language': 'th,en;q=0.9',
-      },
-    });
+    const [goldRes, fxRes] = await Promise.all([
+      fetch('https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1d&range=5d', {
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+      }),
+      fetch('https://open.er-api.com/v6/latest/USD'),
+    ]);
 
-    const $ = cheerio.load(html);
-    const prices: number[] = [];
+    if (!goldRes.ok || !fxRes.ok) return null;
 
-    $('td, span, div').each((_, el) => {
-      const text = $(el).text().trim().replace(/,/g, '');
-      const num = parseFloat(text);
-      if (num >= 50000 && num <= 200000) {
-        prices.push(num);
-      }
-    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [goldData, fxData]: [any, any] = await Promise.all([goldRes.json(), fxRes.json()]);
 
-    if (prices.length < 2) return null;
+    const spot: number | null = goldData?.chart?.result?.[0]?.meta?.regularMarketPrice ?? null;
+    const usdThb: number | null = fxData?.rates?.THB ?? null;
 
-    const sorted = [...new Set(prices)].sort((a, b) => a - b);
-    const barSell = sorted[0];
-    const barBuy  = sorted[1] || sorted[0] + 200;
+    if (!spot || !usdThb) return null;
+
+    const BAHT_WEIGHT_G = 15.244;
+    const TROY_OZ_G = 31.1035;
+    const PURITY = 0.965;
+    const implied = Math.round(spot * (BAHT_WEIGHT_G / TROY_OZ_G) * PURITY * usdThb);
+
+    if (implied < 30000 || implied > 300000) return null;
+
+    const barSell = implied;
+    const barBuy  = implied + 200; // standard GTA spread
 
     return {
       barBuy,
       barSell,
       ornamentBuy: barBuy,
       ornamentSell: barSell,
-      source: 'goldtraders.or.th',
+      source: 'implied (XAU/USD+THB)',
       timestamp: new Date().toISOString(),
     };
   } catch {
@@ -126,7 +128,7 @@ async function fetchFromGoldtraders(): Promise<GoldPrice | null> {
 }
 
 export async function fetchCurrentGoldPrice(): Promise<GoldPrice> {
-  const sources = [fetchFromChnwt, fetchFromThaigold, fetchFromGoldtraders];
+  const sources = [fetchFromChnwt, fetchFromThaigold, fetchImpliedFromSpot];
 
   for (const fetchFn of sources) {
     const result = await fetchFn();
