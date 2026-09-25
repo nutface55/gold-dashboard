@@ -21,7 +21,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { sell_date, sell_weight, sell_price } = body;
+    const { sell_date, sell_weight, sell_price, lot_id } = body;
 
     const cash_generated = Math.round(sell_weight * sell_price);
 
@@ -38,6 +38,11 @@ export async function POST(req: NextRequest) {
        WHERE id = (SELECT id FROM cash_state LIMIT 1)`,
       [cash_generated, (cycle as { id: number })?.id, sell_date]
     );
+
+    // Remove the sold lot from inventory
+    if (lot_id) {
+      await query(`DELETE FROM lots WHERE id = $1`, [lot_id]);
+    }
 
     return NextResponse.json(cycle, { status: 201 });
   } catch (error) {

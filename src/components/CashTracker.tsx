@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CashState } from '@/lib/trading-rules';
+import { CashState, Lot } from '@/lib/trading-rules';
 import { DollarSign, Clock, PlusCircle } from 'lucide-react';
 
 interface Props {
@@ -10,13 +10,14 @@ interface Props {
   sma: number;
   lowerBand: number;
   avgBuyPrice: number;
+  lots: Lot[];
   onUpdate: () => void;
 }
 
-export default function CashTracker({ cashState, currentPrice, sma, lowerBand, avgBuyPrice, onUpdate }: Props) {
+export default function CashTracker({ cashState, currentPrice, sma, lowerBand, avgBuyPrice, lots, onUpdate }: Props) {
   const [showSaleModal, setShowSaleModal] = useState(false);
   const [showBuybackModal, setShowBuybackModal] = useState(false);
-  const [saleForm, setSaleForm] = useState({ date: '', weight: '10', price: String(currentPrice) });
+  const [saleForm, setSaleForm] = useState({ date: '', lot_id: '', weight: '', price: String(currentPrice) });
   const [buybackForm, setBuybackForm] = useState({ date: '', weight: '5', price: '' });
   const [loading, setLoading] = useState(false);
 
@@ -30,6 +31,7 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, a
   const tier3Price = Math.max(lowerBand, Math.round(currentPrice * 0.90));
 
   async function recordSale() {
+    if (!saleForm.lot_id) return;
     setLoading(true);
     try {
       await fetch('/api/cycles', {
@@ -39,9 +41,11 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, a
           sell_date: saleForm.date || new Date().toISOString().split('T')[0],
           sell_weight: parseInt(saleForm.weight),
           sell_price: parseInt(saleForm.price),
+          lot_id: parseInt(saleForm.lot_id),
         }),
       });
       setShowSaleModal(false);
+      setSaleForm({ date: '', lot_id: '', weight: '', price: String(currentPrice) });
       onUpdate();
     } finally {
       setLoading(false);
@@ -190,19 +194,44 @@ export default function CashTracker({ cashState, currentPrice, sma, lowerBand, a
       {showSaleModal && (
         <Modal title="Record a Sale" onClose={() => setShowSaleModal(false)}>
           <div className="space-y-3">
-            <FormField label="Date" type="date" value={saleForm.date}
+            <div>
+              <label className="block text-xs text-slate-400 mb-1">Which lot did you sell?</label>
+              <select
+                value={saleForm.lot_id}
+                onChange={e => {
+                  const lot = lots.find(l => l.id === parseInt(e.target.value));
+                  setSaleForm(f => ({ ...f, lot_id: e.target.value, weight: lot ? String(lot.weight) : f.weight }));
+                }}
+                className="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+              >
+                <option value="">Select lot...</option>
+                {lots.map((lot, i) => (
+                  <option key={lot.id} value={lot.id}>
+                    Lot {i + 1} — {lot.weight}B @ ฿{lot.buy_price.toLocaleString()} ({String(lot.date_bought).split('T')[0]})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <FormField label="Date Sold" type="date" value={saleForm.date}
               onChange={v => setSaleForm(f => ({ ...f, date: v }))} />
-            <FormField label="Weight (baht)" type="number" value={saleForm.weight}
-              onChange={v => setSaleForm(f => ({ ...f, weight: v }))} placeholder="5 or 10" />
+            <div>
+              <label className="block text-xs text-slate-400 mb-1">Weight (baht)</label>
+              <input
+                type="number"
+                value={saleForm.weight}
+                readOnly
+                className="w-full bg-slate-700 border border-slate-700 rounded-lg px-3 py-2 text-slate-400 text-sm cursor-not-allowed"
+              />
+            </div>
             <FormField label="Sell Price (฿/baht)" type="number" value={saleForm.price}
               onChange={v => setSaleForm(f => ({ ...f, price: v }))} />
             {(() => { const w = parseInt(saleForm.weight), p = parseInt(saleForm.price); return w > 0 && p > 0 ? <p className="text-xs text-green-400">Cash generated: ฿{(w * p).toLocaleString()}</p> : null; })()}
             <button
               onClick={recordSale}
-              disabled={loading}
-              className="w-full bg-red-600 hover:bg-red-500 text-white text-sm font-semibold py-2 rounded-lg transition-colors"
+              disabled={loading || !saleForm.lot_id}
+              className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold py-2 rounded-lg transition-colors"
             >
-              {loading ? 'Saving...' : 'Record Sale'}
+              {loading ? 'Saving...' : 'Record Sale & Remove Lot'}
             </button>
           </div>
         </Modal>

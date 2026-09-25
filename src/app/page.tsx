@@ -382,6 +382,7 @@ export default function Dashboard() {
               sma={bands?.sma || avgBuyPrice}
               lowerBand={bands?.lowerBand || Math.round(avgBuyPrice * 0.94)}
               avgBuyPrice={avgBuyPrice}
+              lots={lots}
               onUpdate={() => loadAll(true)}
             />
             <LotTable
