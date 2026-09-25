@@ -34,6 +34,7 @@ export interface CashState {
   source_cycle_id?: number | null;
   updated_at?: string;
   sale_date?: string | null;
+  sell_weight?: number | null;  // from linked cycle — how many baht were originally sold
 }
 
 export interface ActionPlan {
@@ -156,30 +157,69 @@ export function generateActionPlan(
       : 0;
     const cashWarning = daysSinceSale >= 30;
 
-    const scenarios = calculateScenarios(
-      bandPosition.currentPrice,
-      bandPosition.sma,
-      bandPosition.lowerBand,
-      bandPosition.currentPrice
-    ).filter(s => s.isViable && s.cashFromSale <= cashState.amount);
+    const actualCash = cashState.amount;
+    const originalSellWeight = cashState.sell_weight || 0;
 
-    if (scenarios.length > 0) {
-      const best = scenarios[0];
+    // How many whole bricks (5B increments) can we buy right now with actual cash?
+    const buybackWeight = Math.floor(actualCash / currentSellPrice / 5) * 5;
+    const buybackCost = buybackWeight * currentSellPrice;
+    const leftoverCash = actualCash - buybackCost;
+    const netGoldGain = originalSellWeight > 0 ? buybackWeight - originalSellWeight : buybackWeight;
+
+    // Viable: can get back same amount or more (strictly > 0 with no sell_weight means any amount)
+    const isViable = buybackWeight > 0 && (originalSellWeight === 0 || buybackWeight >= originalSellWeight);
+
+    if (isViable) {
+      const bricks: (5 | 10)[] = [];
+      let remaining = buybackWeight;
+      while (remaining >= 10) { bricks.push(10); remaining -= 10; }
+      if (remaining === 5) bricks.push(5);
+
+      const netText = netGoldGain > 0
+        ? `+${netGoldGain}B more gold than you sold`
+        : `the same ${buybackWeight}B back`;
+
+      const mathLines = [
+        `Cash on hand: ฿${actualCash.toLocaleString()}`,
+        `Buy at ฿${currentSellPrice.toLocaleString()}: ฿${actualCash.toLocaleString()} ÷ ฿${currentSellPrice.toLocaleString()} = ${(actualCash / currentSellPrice).toFixed(2)} baht`,
+        `→ ${bricks.map(b => `${b}B`).join(' + ')} = ${buybackWeight}B (cost ฿${buybackCost.toLocaleString()})`,
+        `→ Leftover: ฿${leftoverCash.toLocaleString()}`,
+        `→ Net: ${originalSellWeight > 0 ? `sold ${originalSellWeight}B, got ${buybackWeight}B back` : `bought ${buybackWeight}B`} + ฿${leftoverCash.toLocaleString()} toward next brick`,
+        `✓ Verified: ${buybackWeight}B × ฿${currentSellPrice.toLocaleString()} = ฿${buybackCost.toLocaleString()}. ฿${actualCash.toLocaleString()} − ฿${buybackCost.toLocaleString()} = ฿${leftoverCash.toLocaleString()}. Correct.`,
+      ];
+
       return {
         signal: 'buy_back',
-        headline: `Buy back ${best.buybackWeight}B gold now — you'll end up with more than you sold`,
-        detail: `You have ฿${cashState.amount.toLocaleString()} from your sale ${daysSinceSale} days ago. Gold has dropped enough — buy ${best.buybackBricks.map(b => `${b}B`).join(' + ')} at ฿${bandPosition.currentPrice.toLocaleString()} and you end up with ${best.netGoldGain > 0 ? `+${best.netGoldGain}B more gold` : 'the same gold back'} plus ฿${best.leftoverCash.toLocaleString()} leftover for the next cycle.\n\n📊 Technical: Price is near the SMA (20-day average ฿${bandPosition.sma.toLocaleString()}) — a historically reliable re-entry point.`,
-        mathVerification: formatMathVerification(best),
-        bestScenario: best,
+        headline: netGoldGain > 0
+          ? `Buy back ${buybackWeight}B now — you'll get more gold than you sold`
+          : `Buy back ${buybackWeight}B now — recover your full position + ฿${leftoverCash.toLocaleString()} leftover`,
+        detail: `You have ฿${actualCash.toLocaleString()} from your sale ${daysSinceSale} days ago. Gold has dropped enough — buy ${bricks.map(b => `${b}B`).join(' + ')} at ฿${currentSellPrice.toLocaleString()} and you end up with ${netText} plus ฿${leftoverCash.toLocaleString()} leftover toward the next brick.\n\n📊 Technical: SMA is ฿${bandPosition.sma.toLocaleString()} — buying here or lower is a solid re-entry.`,
+        mathVerification: mathLines.join('\n'),
         daysSinceSale,
         cashWarning,
       };
     }
 
+    // Price hasn't dropped enough — tell them what price they need
+    const priceForSame = originalSellWeight > 0
+      ? Math.floor(actualCash / originalSellWeight)
+      : 0;
+    const priceForMore = originalSellWeight > 0
+      ? Math.floor(actualCash / (originalSellWeight + 5))
+      : 0;
+
+    const waitDetail = originalSellWeight > 0
+      ? `At current price (฿${currentSellPrice.toLocaleString()}) you'd only get back ${buybackWeight}B — less than the ${originalSellWeight}B you sold. Wait for a better entry.\n\n` +
+        `📊 Price targets:\n` +
+        `  • ฿${priceForSame.toLocaleString()} → get back ${originalSellWeight}B (same) + leftover cash\n` +
+        `  • ฿${priceForMore.toLocaleString()} → get back ${originalSellWeight + 5}B (+5B net gain)\n` +
+        `  • SMA: ฿${bandPosition.sma.toLocaleString()} | Lower band: ฿${bandPosition.lowerBand.toLocaleString()}`
+      : `Gold is still too high right now. Waiting for a clearer entry.\n\n📊 Tier 1 ฿${Math.round(currentSellPrice * 0.95).toLocaleString()} (−5%) | SMA ฿${bandPosition.sma.toLocaleString()} | Lower band ฿${bandPosition.lowerBand.toLocaleString()}`;
+
     return {
       signal: 'buy_back',
       headline: `Hold your cash — price hasn't dropped enough yet`,
-      detail: `You have ฿${cashState.amount.toLocaleString()} ready. Gold is still too high to buy back more bricks than you sold. Be patient — the goal is to end up with MORE gold, not the same amount.\n\n📊 Technical: Waiting for Tier 1 ฿${Math.round(bandPosition.currentPrice * 0.95).toLocaleString()} (−5%), Tier 2 ฿${bandPosition.sma.toLocaleString()} (SMA), or Tier 3 ฿${bandPosition.lowerBand.toLocaleString()} (lower Bollinger Band).`,
+      detail: `You have ฿${actualCash.toLocaleString()} ready. ${waitDetail}`,
       daysSinceSale,
       cashWarning,
     };

@@ -4,7 +4,10 @@ import { query, queryOne } from '@/lib/db';
 export async function GET() {
   try {
     const state = await queryOne(
-      `SELECT * FROM cash_state ORDER BY id LIMIT 1`
+      `SELECT cs.*, c.sell_weight
+       FROM cash_state cs
+       LEFT JOIN cycles c ON c.id = cs.source_cycle_id
+       ORDER BY cs.id LIMIT 1`
     );
     return NextResponse.json(state || { amount: 0 });
   } catch (error) {
